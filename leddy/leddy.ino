@@ -169,6 +169,52 @@ void setup() {
   }
 
   allColumnBytesSize = strlen(text)*8;  
+  
+  allColumnBytesSize = squashSpaces(allColumnBytes, allColumnBytesSize);
+}
+
+/**
+ *  Squash spaces in buffer. The buffer is filled up to length
+ *  Returns the new length (<= original length)
+ */
+int squashSpaces(byte* buffer, int length) {
+    int newLength = length;
+    int i = 0;
+    while (i < newLength) {
+        if (!buffer[i]) {  // A zero row
+            int spaces = 0;
+            // while not at the end and there is a space
+            while (i + spaces < newLength && !buffer[i + spaces]) {
+                spaces++;
+            }
+            if (i + spaces == newLength) {
+                // At the end of the buffer, trim spaces
+                return newLength - spaces;
+            }
+            if (spaces == 8) {
+                // This is a space, skip 8 characters
+                i = i + 8;
+            } else if (spaces > 8) {
+                // trim to 8 spaces
+                int toShift = spaces - 8;
+                for (int j = i + spaces; j < newLength; j++) {
+                    buffer[j - toShift] = buffer[j];
+                }
+                newLength = newLength - toShift;
+                i = i + 8;
+            } else if (spaces < 8) {
+                // trim to 1 space
+                int toShift = spaces - 1;
+                for (int j = i + spaces; j < newLength; j++) {
+                    buffer[j - toShift] = buffer[j];
+                }
+                newLength = newLength - toShift;
+                i = i + 1;
+            }
+        }
+        i++;
+    }
+    return newLength;
 }
 
 /**
