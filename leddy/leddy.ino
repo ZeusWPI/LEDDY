@@ -1,5 +1,5 @@
 
-#include "LedControl.h" // LedControl byEberhard Fahle <e.fahle@wayoda.org> v1.0.6
+#include "LedControl.h" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 /* Create a new LedControl variable.
  * We use pins 12,11 and 10 on the Arduino for the SPI interface
  * Pin 12 is connected to the DATA IN-pin of the first MAX7221
@@ -140,30 +140,17 @@ char font8x8_basic[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}    // U+007F
 };
 
-// delay time between faces
-unsigned long delaytime=1000;
-
-// happy face
-byte hf[8]= {
-  B00111100,
-  B01000010,
-  B10100101,B10000001,B10100101,B10011001,B01000010,B00111100};
-// neutral face
-byte nf[8]={B00111100, B01000010,B10100101,B10000001,B10111101,B10000001,B01000010,B00111100};
-// sad face
-byte sf[8]= {B00111100,B01000010,B10100101,B10000001,B10011001,B10100101,B01000010,B00111100};
-
 char* text = "Merry Christmas @ ZeusWPI\0";
-byte allInts[600];
+byte allColumnBytes[600];
 
 void setup() {
   Serial.begin(9600);
-  //displayCharacter1(0, '_');
+
   lc.shutdown(0,false);
   lc.shutdown(1,false);
   // Set brightness to a medium value
-  lc.setIntensity(0,8);
-  lc.setIntensity(1,8);
+  lc.setIntensity(0,15);
+  lc.setIntensity(1,15);
   // Clear the display
   lc.clearDisplay(0);  
   lc.clearDisplay(1);
@@ -172,158 +159,51 @@ void setup() {
   for (int i = 0; i < strlen(text); i++) {
     byte* inputC = font8x8_basic[text[i]];
     byte convertedC[8] = {0,0,0,0,0,0,0,0};
-    convertCharacterRowsToColumns2(inputC, convertedC);
+    convertCharacterRowsToColumns(inputC, convertedC);
     for (int j = 0; j < 8; j++) {
-      allInts[16+i*8+j] = convertedC[j];
+      allColumnBytes[16+i*8+j] = convertedC[j];
     }
   }
 }
 
-void drawFaces(){
-  // Display sad face
-  lc.setRow(0,0,sf[0]);
-  lc.setRow(0,1,sf[1]);
-  lc.setRow(0,2,sf[2]);
-  lc.setRow(0,3,sf[3]);
-  lc.setRow(0,4,sf[4]);
-  lc.setRow(0,5,sf[5]);
-  lc.setRow(0,6,sf[6]);
-  lc.setRow(0,7,sf[7]);
-  delay(delaytime);
-  
-  // Display neutral face
-  lc.setRow(0,0,nf[0]);
-  lc.setRow(0,1,nf[1]);
-  lc.setRow(0,2,nf[2]);
-  lc.setRow(0,3,nf[3]);
-  lc.setRow(0,4,nf[4]);
-  lc.setRow(0,5,nf[5]);
-  lc.setRow(0,6,nf[6]);
-  lc.setRow(0,7,nf[7]);
-  delay(delaytime);
-  
-  // Display happy face
-  lc.setRow(0,0,hf[0]);
-  lc.setRow(0,1,hf[1]);
-  lc.setRow(0,2,hf[2]);
-  lc.setRow(0,3,hf[3]);
-  lc.setRow(0,4,hf[4]);
-  lc.setRow(0,5,hf[5]);
-  lc.setRow(0,6,hf[6]);
-  lc.setRow(0,7,hf[7]);
-  delay(delaytime);
-}
-
-void displayCharacter(int addr, char c) {
-  lc.setColumn(addr, 0, font8x8_basic[c][0]);
-  lc.setColumn(addr, 1, font8x8_basic[c][1]);
-  lc.setColumn(addr, 2, font8x8_basic[c][2]);
-  lc.setColumn(addr, 3, font8x8_basic[c][3]);
-  lc.setColumn(addr, 4, font8x8_basic[c][4]);
-  lc.setColumn(addr, 5, font8x8_basic[c][5]);
-  lc.setColumn(addr, 6, font8x8_basic[c][6]);
-  lc.setColumn(addr, 7, font8x8_basic[c][7]);
-}
-
-void displayCharacter1(int addr, char c) {
-  int bitChar[8] = {0,0,0,0,0,0,0,0};
-  convertCharacterRowsToColumns(c, bitChar);
-
-  lc.setRow(addr, 0, bitChar[0]);
-  lc.setRow(addr, 1, bitChar[1]);
-  lc.setRow(addr, 2, bitChar[2]);
-  lc.setRow(addr, 3, bitChar[3]);
-  lc.setRow(addr, 4, bitChar[4]);
-  lc.setRow(addr, 5, bitChar[5]);
-  lc.setRow(addr, 6, bitChar[6]);
-  lc.setRow(addr, 7, bitChar[7]);
-}
-
-void displayCharacter2(int addr, int* bitChar) {
- 
-  lc.setRow(addr, 0, bitChar[0]);
-  lc.setRow(addr, 1, bitChar[1]);
-  lc.setRow(addr, 2, bitChar[2]);
-  lc.setRow(addr, 3, bitChar[3]);
-  lc.setRow(addr, 4, bitChar[4]);
-  lc.setRow(addr, 5, bitChar[5]);
-  lc.setRow(addr, 6, bitChar[6]);
-  lc.setRow(addr, 7, bitChar[7]);
-}
-
-void displayCharacter3(int addr, int* bitChar) {
- 
-  lc.setColumn(addr, 0, bitChar[0]);
-  lc.setColumn(addr, 1, bitChar[1]);
-  lc.setColumn(addr, 2, bitChar[2]);
-  lc.setColumn(addr, 3, bitChar[3]);
-  lc.setColumn(addr, 4, bitChar[4]);
-  lc.setColumn(addr, 5, bitChar[5]);
-  lc.setColumn(addr, 6, bitChar[6]);
-  lc.setColumn(addr, 7, bitChar[7]);
-}
-
-bool getBit(uint8_t input, int bit) {
+/**
+  * Helper function to get a bit from a byte.
+  */
+bool getBit(byte input, int bit) {
   return (input & (0x80 >> bit)) > 0; 
 }
 
-uint8_t setBit(uint8_t input, int bit, bool value) {
-  uint8_t mask = value << (7-bit); // example 00010000
+/**
+  * Helper function to change a bit in a byte.
+  */
+byte setBit(byte input, int bit, bool value) {
+  byte mask = value << (7-bit); // example 00010000
   return (input & (~mask)) | mask; 
 }
 
-void convertCharacterRowsToColumns2(byte* unconverted, byte* converted) {
+/**
+  * Characters are stored as a byte per row, we want to store them as a byte per column.
+  */
+void convertCharacterRowsToColumns(byte* rowBased, byte* columnBased) {
   for(int i = 0; i < 8; i++) {
     for(int j = 0; j < 8; j++) {
-      converted[i] = setBit(converted[i], j, getBit(unconverted[7-j], 7-i));
+      columnBased[i] = setBit(columnBased[i], j, getBit(rowBased[7-j], 7-i));
     }        
   }
 }
 
-
-void convertCharacterRowsToColumns1(int* unconverted, int* converted) {
-  //int myconverted[8]; // = {0,0,0,0,0,0,0,0};
-  for (int i = 0; i < 8 ; i++) {
-    converted[i] = 0;
-    // converted[i] |= (unconverted[0] & (0x80 >> i)) << i;
-    for (int j = 0; j < 8; j++) {
-      converted[i] |= (unconverted[j] & (0x80 >> i)) << i;
-      //Serial.print(F("test"));
-    }
-  }
-}
-
-void displaySlidingWindow(int currentStartIndex, int windowSize, byte* allInts) {
+/**
+  * Display the sliding window by choosing a subsection of the bytes (columns) to display.
+  */
+void displaySlidingWindow(int currentStartIndex, int windowSize) {
   for (int i = 0; i < windowSize; i++) {
-    lc.setRow(i/8, i%8, allInts[currentStartIndex + i]);
+    lc.setRow(i/8, i%8, allColumnBytes[currentStartIndex + i]);
   }
-}
-
-void convertCharacterRowsToColumns(char c, int* converted) {
-  //int myconverted[8]; // = {0,0,0,0,0,0,0,0};
-  for (int i = 0; i < 8 ; i++) {
-    converted[i] = 0;
-    for (int j = 0; j < 8; j++) {
-      converted[i] |= (font8x8_basic[c][j] & (B00000001 << i)) << j;
-      //Serial.print(F("test"));
-    }
-  }
-  // int row1 = 0;
-  // row1 |= font8x8_basic[c][0] & B10000000;
-  // row1 |= (font8x8_basic[c][1] & B10000000) >> 1;
-  // row1 |= (font8x8_basic[c][2] & B10000000) >> 2;
-  // row1 |= (font8x8_basic[c][3] & B10000000) >> 3;
-  // row1 |= (font8x8_basic[c][4] & B10000000) >> 4;
-  // row1 |= (font8x8_basic[c][5] & B10000000) >> 5;
-  // row1 |= (font8x8_basic[c][6] & B10000000) >> 6;
-  // row1 |= (font8x8_basic[c][7] & B10000000) >> 7;
-  // return row1;
-  //return converted;
 }
 
 int currentStartIndex = 0;
 void loop() {
-  displaySlidingWindow(currentStartIndex, 16, allInts);
+  displaySlidingWindow(currentStartIndex, 16);
   currentStartIndex = (currentStartIndex + 1) % (strlen(text)*8 + 16);
   delay(30);
 }
