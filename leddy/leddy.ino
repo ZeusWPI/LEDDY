@@ -132,13 +132,13 @@ const PROGMEM char font8x8_basic[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}    // U+007F
 };
 
-char* text = "Merry Christmas @ ZeusWPI\0";
+char* text = "Merry Christmas @ ZeusWPI!\0";
 byte allColumnBytes[1000];
 size_t allColumnBytesSize;
 int nrOfMaxModules = 8;
 
-int leadingWhitespace = nrOfMaxModules*8;
-int trailingWhitespace = nrOfMaxModules*8;
+int trailingWhitespace = 6*8; // Four modules between loops
+int spaceWidth = 5;
 
 
 /* Create a new LedControl variable.
@@ -167,64 +167,49 @@ void setup() {
     byte columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     convertCharacterRowsToColumns(c, columnBasedCharacter);
     for (int j = 0; j < 8; j++) {
-      allColumnBytes[leadingWhitespace+i*8+j] = columnBasedCharacter[j];
+      allColumnBytes[i*8+j] = columnBasedCharacter[j];
     }
   }
 
-  int textEnd = leadingWhitespace + strlen(text)*8;
-  int squashedTextEnd = squashSpaces(allColumnBytes, leadingWhitespace, textEnd);
-  for (int i = squashedTextEnd; i < squashedTextEnd + trailingWhitespace; i++) {
+  int squashedSize = squashSpaces(allColumnBytes, strlen(text)*8);
+  allColumnBytesSize = squashedSize + trailingWhitespace;
+  for (int i = squashedSize; i < allColumnBytesSize; i++) {
     allColumnBytes[i] = 0;
   }
-  allColumnBytesSize = squashedTextEnd + trailingWhitespace;
 }
 
 /**
  *  Squash spaces in buffer. The buffer is filled up to length
  *  Returns the new length (<= original length)
  */
-int squashSpaces(byte* buffer, int start, int end) {
-    int newEnd = end;
-    int i = start;
-    while (i < newEnd) {
+int squashSpaces(byte* buffer, int length) {
+    int newLength = length;
+    int i = 0;
+    while (i < newLength) {
         if (!buffer[i]) {  // A zero row
             int spaces = 0;
             // while not at the end and there is a space
-            while (i + spaces < newEnd && !buffer[i + spaces]) {
-                Serial.print(buffer[i+spaces]);
+            while (i + spaces < newLength && !buffer[i + spaces]) {
                 spaces++;
             }
-            Serial.println();
-            if (i + spaces == newEnd) {
-                // At the end of the buffer, trim spaces
-                return newEnd - spaces;
+            if (i + spaces == newLength) {
+                // At the end of the buffer, trim spaces and return new length
+                return newLength - spaces;
             }
-            if (spaces == 8) {
-                // This is a space, skip 8 characters
-                i = i + 8;
-            } else if (spaces > 8) {
-                Serial.println("MEER DAN 8");
-                Serial.print("Trimming "); Serial.println(spaces -8);
-                // trim to 8 spaces
-                int toShift = spaces - 8;
-                for (int j = i + spaces; j < newEnd; j++) {
-                    buffer[j - toShift] = buffer[j];
-                }
-                newEnd = newEnd - toShift;
-                i = i + 8;
-            } else if (spaces < 8) {
-                // trim to 1 space
-                int toShift = spaces - 1;
-                for (int j = i + spaces; j < newEnd; j++) {
-                    buffer[j - toShift] = buffer[j];
-                }
-                newEnd = newEnd - toShift;
-                i = i + 1;
+            // In the input, a space character will be 8 space columns.
+            // Either squash to spaceWidth spaces or 1 space
+            int toShift = spaces >= 8 ? spaces - spaceWidth : spaces - 1;
+            if (toShift > 0) {
+              for (int j = i + spaces; j < newLength; j++) {
+                  buffer[j - toShift] = buffer[j];
+              }
+              newLength = newLength - toShift;
             }
+            i = i + spaces - toShift;
         }
         i++;
     }
-    return newEnd;
+    return newLength;
 }
 
 /**
