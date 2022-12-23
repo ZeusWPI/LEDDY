@@ -1,13 +1,5 @@
 
 #include "LedControl.h" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
-/* Create a new LedControl variable.
- * We use pins 12,11 and 10 on the Arduino for the SPI interface
- * Pin 12 is connected to the DATA IN-pin of the first MAX7221
- * Pin 11 is connected to the CLK-pin of the first MAX7221
- * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
- * There will only be a single MAX7221 attached to the arduino 
- */  
-LedControl lc=LedControl(12,11,10,2); 
 
 char font8x8_basic[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)
@@ -142,28 +134,41 @@ char font8x8_basic[128][8] = {
 
 char* text = "Merry Christmas @ ZeusWPI\0";
 byte allColumnBytes[600];
+size_t allColumnBytesSize = 600;
+int nrOfMaxModules = 5;
+
+
+/* Create a new LedControl variable.
+ * We use pins 12,11 and 10 on the Arduino for the SPI interface
+ * Pin 12 is connected to the DATA IN-pin of the first MAX7221
+ * Pin 11 is connected to the CLK-pin of the first MAX7221
+ * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
+ * Amount of MAX7221 modules attached to the arduino 
+ */  
+LedControl lc=LedControl(12,11,10,nrOfMaxModules); 
+
 
 void setup() {
   Serial.begin(9600);
 
-  lc.shutdown(0,false);
-  lc.shutdown(1,false);
-  // Set brightness to a medium value
-  lc.setIntensity(0,15);
-  lc.setIntensity(1,15);
-  // Clear the display
-  lc.clearDisplay(0);  
-  lc.clearDisplay(1);
+  // setup max modules
+  for (int i = 0; i < nrOfMaxModules; i++) {
+    lc.shutdown(i, false);
+    lc.setIntensity(i, 15);
+    lc.clearDisplay(i);
+  }
 
-  
+  // setup allColumnBytes
   for (int i = 0; i < strlen(text); i++) {
-    byte* inputC = font8x8_basic[text[i]];
-    byte convertedC[8] = {0,0,0,0,0,0,0,0};
-    convertCharacterRowsToColumns(inputC, convertedC);
+    byte* rowBasedCharacter = font8x8_basic[text[i]];
+    byte columnBasedCharacter[8] = {0,0,0,0,0,0,0,0};
+    convertCharacterRowsToColumns(rowBasedCharacter, columnBasedCharacter);
     for (int j = 0; j < 8; j++) {
-      allColumnBytes[16+i*8+j] = convertedC[j];
+      allColumnBytes[nrOfMaxModules*8+i*8+j] = columnBasedCharacter[j];
     }
   }
+
+  allColumnBytesSize = strlen(text)*8;  
 }
 
 /**
@@ -203,7 +208,7 @@ void displaySlidingWindow(int currentStartIndex, int windowSize) {
 
 int currentStartIndex = 0;
 void loop() {
-  displaySlidingWindow(currentStartIndex, 16);
-  currentStartIndex = (currentStartIndex + 1) % (strlen(text)*8 + 16);
+  displaySlidingWindow(currentStartIndex, nrOfMaxModules*8);
+  currentStartIndex = (currentStartIndex + 1) % (allColumnBytesSize + nrOfMaxModules*8);
   delay(30);
 }
