@@ -133,9 +133,12 @@ const PROGMEM char font8x8_basic[128][8] = {
 };
 
 char* text = "Merry Christmas @ ZeusWPI\0";
-byte allColumnBytes[600];
-size_t allColumnBytesSize = 600;
+byte allColumnBytes[1000];
+size_t allColumnBytesSize;
 int nrOfMaxModules = 8;
+
+int leadingWhitespace = nrOfMaxModules*8;
+int trailingWhitespace = nrOfMaxModules*8;
 
 
 /* Create a new LedControl variable.
@@ -161,60 +164,67 @@ void setup() {
   // setup allColumnBytes
   for (int i = 0; i < strlen(text); i++) {
     char c = text[i];
-    byte columnBasedCharacter[8] = {0,0,0,0,0,0,0,0};
+    byte columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     convertCharacterRowsToColumns(c, columnBasedCharacter);
     for (int j = 0; j < 8; j++) {
-      allColumnBytes[nrOfMaxModules*8+i*8+j] = columnBasedCharacter[j];
+      allColumnBytes[leadingWhitespace+i*8+j] = columnBasedCharacter[j];
     }
   }
 
-  allColumnBytesSize = strlen(text)*8;  
-  
-  allColumnBytesSize = squashSpaces(allColumnBytes, allColumnBytesSize);
+  int textEnd = leadingWhitespace + strlen(text)*8;
+  int squashedTextEnd = squashSpaces(allColumnBytes, leadingWhitespace, textEnd);
+  for (int i = squashedTextEnd; i < squashedTextEnd + trailingWhitespace; i++) {
+    allColumnBytes[i] = 0;
+  }
+  allColumnBytesSize = squashedTextEnd + trailingWhitespace;
 }
 
 /**
  *  Squash spaces in buffer. The buffer is filled up to length
  *  Returns the new length (<= original length)
  */
-int squashSpaces(byte* buffer, int length) {
-    int newLength = length;
-    int i = 0;
-    while (i < newLength) {
+int squashSpaces(byte* buffer, int start, int end) {
+    int newEnd = end;
+    int i = start;
+    while (i < newEnd) {
         if (!buffer[i]) {  // A zero row
             int spaces = 0;
             // while not at the end and there is a space
-            while (i + spaces < newLength && !buffer[i + spaces]) {
+            while (i + spaces < newEnd && !buffer[i + spaces]) {
+                Serial.print(buffer[i+spaces]);
                 spaces++;
             }
-            if (i + spaces == newLength) {
+            Serial.println();
+            if (i + spaces == newEnd) {
                 // At the end of the buffer, trim spaces
-                return newLength - spaces;
+                return newEnd - spaces;
             }
             if (spaces == 8) {
                 // This is a space, skip 8 characters
                 i = i + 8;
             } else if (spaces > 8) {
+                Serial.println("MEER DAN 8");
+                Serial.print("Trimming "); Serial.println(spaces -8);
                 // trim to 8 spaces
                 int toShift = spaces - 8;
-                for (int j = i + spaces; j < newLength; j++) {
+                for (int j = i + spaces; j < newEnd; j++) {
                     buffer[j - toShift] = buffer[j];
                 }
-                newLength = newLength - toShift;
+                newEnd = newEnd - toShift;
                 i = i + 8;
             } else if (spaces < 8) {
                 // trim to 1 space
                 int toShift = spaces - 1;
-                for (int j = i + spaces; j < newLength; j++) {
+                for (int j = i + spaces; j < newEnd; j++) {
                     buffer[j - toShift] = buffer[j];
                 }
-                newLength = newLength - toShift;
+                newEnd = newEnd - toShift;
                 i = i + 1;
             }
         }
         i++;
     }
-    return newLength;
+    return newEnd;
 }
 
 /**
@@ -248,12 +258,12 @@ void convertCharacterRowsToColumns(char character, byte* columnBased) {
   */
 void displaySlidingWindow(int currentStartIndex, int windowSize) {
   for (int i = 0; i < windowSize; i++) {
-    lc.setRow(i/8, i%8, allColumnBytes[currentStartIndex + i]);
+    lc.setRow(i/8, i%8, allColumnBytes[(currentStartIndex + i) % allColumnBytesSize]);
   }
 }
 
 int currentStartIndex = 0;
 void loop() {
   displaySlidingWindow(currentStartIndex, nrOfMaxModules*8);
-  currentStartIndex = (currentStartIndex + 1) % (allColumnBytesSize + nrOfMaxModules*8);
+  currentStartIndex = (currentStartIndex + 1) % allColumnBytesSize;
 }
