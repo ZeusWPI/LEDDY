@@ -1,7 +1,7 @@
 
 #include "LedControl.h" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 
-char font8x8_basic[128][8] = {
+const PROGMEM char font8x8_basic[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0001
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0002
@@ -135,7 +135,7 @@ char font8x8_basic[128][8] = {
 char* text = "Merry Christmas @ ZeusWPI\0";
 byte allColumnBytes[600];
 size_t allColumnBytesSize = 600;
-int nrOfMaxModules = 5;
+int nrOfMaxModules = 8;
 
 
 /* Create a new LedControl variable.
@@ -160,9 +160,9 @@ void setup() {
 
   // setup allColumnBytes
   for (int i = 0; i < strlen(text); i++) {
-    byte* rowBasedCharacter = font8x8_basic[text[i]];
+    char c = text[i];
     byte columnBasedCharacter[8] = {0,0,0,0,0,0,0,0};
-    convertCharacterRowsToColumns(rowBasedCharacter, columnBasedCharacter);
+    convertCharacterRowsToColumns(c, columnBasedCharacter);
     for (int j = 0; j < 8; j++) {
       allColumnBytes[nrOfMaxModules*8+i*8+j] = columnBasedCharacter[j];
     }
@@ -189,10 +189,10 @@ byte setBit(byte input, int bit, bool value) {
 /**
   * Characters are stored as a byte per row, we want to store them as a byte per column.
   */
-void convertCharacterRowsToColumns(byte* rowBased, byte* columnBased) {
+void convertCharacterRowsToColumns(char character, byte* columnBased) {
   for(int i = 0; i < 8; i++) {
     for(int j = 0; j < 8; j++) {
-      columnBased[i] = setBit(columnBased[i], j, getBit(rowBased[7-j], 7-i));
+      columnBased[i] = setBit(columnBased[i], j, getBit(pgm_read_byte(&(font8x8_basic[character][7-j])), 7-i));
     }        
   }
 }
@@ -210,5 +210,4 @@ int currentStartIndex = 0;
 void loop() {
   displaySlidingWindow(currentStartIndex, nrOfMaxModules*8);
   currentStartIndex = (currentStartIndex + 1) % (allColumnBytesSize + nrOfMaxModules*8);
-  delay(30);
 }
