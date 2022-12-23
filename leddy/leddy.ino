@@ -1,7 +1,7 @@
 
 #include "LedControl.h" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 
-const PROGMEM char font8x8_basic[128][8] = {
+const PROGMEM char font8x8_basic[145][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0001
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0002
@@ -129,16 +129,34 @@ const PROGMEM char font8x8_basic[128][8] = {
     { 0x18, 0x18, 0x18, 0x00, 0x18, 0x18, 0x18, 0x00},   // U+007C (|)
     { 0x07, 0x0C, 0x0C, 0x38, 0x0C, 0x0C, 0x07, 0x00},   // U+007D (})
     { 0x6E, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+007E (~)
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}    // U+007F
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+007F
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0080
+    { 0x6C, 0xFE, 0xFE, 0xFE, 0x7C, 0x38, 0x10, 0x00},   // U+0081 (unused in extended ascii -> ❤️)
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0082
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0083
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0084
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0085
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0086
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0087
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0088
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0089
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+008A
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+008B
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+008C
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+008D (unused)
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+008E
+    { 0xFF, 0x98, 0xF4, 0x92, 0x71, 0x1F, 0x50, 0xA0},   // U+008F (unused, first half Zeus logo)
+    { 0x3C, 0x0C, 0x3C, 0x24, 0x3B, 0x2D, 0x2D, 0x24}    // U+0090 (unused, second half Zeus logo)
 };
 
-char* text = "Merry Christmas @ ZeusWPI!\0";
-byte allColumnBytes[1000];
+// strlen(text) < (buffer size - trailingWhitspace) / 8 - 1
+unsigned char *text = "\201 Merry Christmas and a happy new year from Zeus WPI! \\o/ \201 \217\220\0";
+byte allColumnBytes[1500];
 size_t allColumnBytesSize;
 int nrOfMaxModules = 8;
 
 int trailingWhitespace = 6*8; // Four modules between loops
-int spaceWidth = 5;
+int spaceWidth = 6;
 
 
 /* Create a new LedControl variable.
@@ -148,7 +166,7 @@ int spaceWidth = 5;
  * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
  * Amount of MAX7221 modules attached to the arduino 
  */  
-LedControl lc=LedControl(12,11,10,nrOfMaxModules); 
+LedControl lc = LedControl(12, 11, 10, nrOfMaxModules); 
 
 
 void setup() {
@@ -157,15 +175,14 @@ void setup() {
   // setup max modules
   for (int i = 0; i < nrOfMaxModules; i++) {
     lc.shutdown(i, false);
-    lc.setIntensity(i, 15);
+    lc.setIntensity(i, 0);
     lc.clearDisplay(i);
   }
 
   // setup allColumnBytes
   for (int i = 0; i < strlen(text); i++) {
-    char c = text[i];
     byte columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    convertCharacterRowsToColumns(c, columnBasedCharacter);
+    convertCharacterRowsToColumns(text[i], columnBasedCharacter);
     for (int j = 0; j < 8; j++) {
       allColumnBytes[i*8+j] = columnBasedCharacter[j];
     }
@@ -182,7 +199,7 @@ void setup() {
  *  Squash spaces in buffer. The buffer is filled up to length
  *  Returns the new length (<= original length)
  */
-int squashSpaces(byte* buffer, int length) {
+int squashSpaces(byte *buffer, int length) {
     int newLength = length;
     int i = 0;
     while (i < newLength) {
@@ -230,7 +247,7 @@ byte setBit(byte input, int bit, bool value) {
 /**
   * Characters are stored as a byte per row, we want to store them as a byte per column.
   */
-void convertCharacterRowsToColumns(char character, byte* columnBased) {
+void convertCharacterRowsToColumns(unsigned char character, byte *columnBased) {
   for(int i = 0; i < 8; i++) {
     for(int j = 0; j < 8; j++) {
       columnBased[i] = setBit(columnBased[i], j, getBit(pgm_read_byte(&(font8x8_basic[character][7-j])), 7-i));
