@@ -17,10 +17,10 @@
     - `setColumn`, analogous to the above
 - Each character is stored as 8 bytes resulting in an 8 by 8 grid of bits
 - We do some weird 'transposing' of the text string, so that the list of bytes to display are columns when looking at the led displays. To display what we call a sliding window, we just have to send the correct columns to the displays.
+- The font is originally from Marcel Sondaar, public domain, made available [here](https://github.com/dhepper/font8x8)
 
 #### Development
 
 - Arduino IDE
 - Dependencies:
     - [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
-- Letter font originally from Marcel Sondaar, public domain, found [here](https://github.com/dhepper/font8x8/blob/master/font8x8_basic.h)
