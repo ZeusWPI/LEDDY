@@ -150,33 +150,42 @@ const PROGMEM char font8x8_basic[145][8] = {
 };
 
 // strlen(text) < (buffer size - trailingWhitspace) / 8 - 1
-unsigned char *text = "\201 Merry Christmas and a happy new year from Zeus WPI! \\o/ \201 \217\220\0";
+unsigned char *text = "\201 Welkom in de kelder! \201\0";
 byte allColumnBytes[1500];
 size_t allColumnBytesSize;
-int nrOfMaxModules = 8;
 
 int trailingWhitespace = 6*8; // Four modules between loops
 int spaceWidth = 6;
 
 
+int amountOfScreens = 2;
+int screenSizes[2] = {
+  8,
+  3
+};
+LedControl lcs[2] = {
 /* Create a new LedControl variable.
  * We use pins 12,11 and 10 on the Arduino for the SPI interface
  * Pin 12 is connected to the DATA IN-pin of the first MAX7221
  * Pin 11 is connected to the CLK-pin of the first MAX7221
  * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
  * Amount of MAX7221 modules attached to the arduino 
- */  
-LedControl lc = LedControl(12, 11, 10, nrOfMaxModules); 
-
+ */
+  LedControl(12, 11, 10, screenSizes[0]),
+  LedControl(7, 6, 5, screenSizes[1])
+};
+int totalLedSize = 11;
 
 void setup() {
   Serial.begin(9600);
 
-  // setup max modules
-  for (int i = 0; i < nrOfMaxModules; i++) {
-    lc.shutdown(i, false);
-    lc.setIntensity(i, 0);
-    lc.clearDisplay(i);
+  // clear and set intensity
+  for (int i = 0; i < amountOfScreens; i++) {
+    for (int j = 0; j < screenSizes[i]; j++) {
+      lcs[i].shutdown(j, false);
+      lcs[i].setIntensity(j, 15);
+      lcs[i].clearDisplay(j);
+    }
   }
 
   // setup allColumnBytes
@@ -256,16 +265,28 @@ void convertCharacterRowsToColumns(unsigned char character, byte *columnBased) {
 }
 
 /**
+  * Wrapper around LedControl.setRow that takes the correct screen array
+  */
+void setRow(int screen, int row, byte data) {
+  int screenindex = 0;
+  while (screen >= screenSizes[screenindex]) {
+    screen -= screenSizes[screenindex];
+    screenindex++;
+  }
+  lcs[screenindex].setRow(screen, row, data);
+}
+
+/**
   * Display the sliding window by choosing a subsection of the bytes (columns) to display.
   */
 void displaySlidingWindow(int currentStartIndex, int windowSize) {
   for (int i = 0; i < windowSize; i++) {
-    lc.setRow(i/8, i%8, allColumnBytes[(currentStartIndex + i) % allColumnBytesSize]);
+    setRow(i/8, i%8, allColumnBytes[(currentStartIndex + i) % allColumnBytesSize]);
   }
 }
 
 int currentStartIndex = 0;
 void loop() {
-  displaySlidingWindow(currentStartIndex, nrOfMaxModules*8);
+  displaySlidingWindow(currentStartIndex, totalLedSize*8);
   currentStartIndex = (currentStartIndex + 1) % allColumnBytesSize;
 }
