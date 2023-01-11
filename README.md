@@ -23,4 +23,4 @@
 - Arduino IDE
 - Dependencies:
     - [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
-
+- Letter font originally from Marcel Sondaar, public domain, found [here](https://github.com/dhepper/font8x8/blob/master/font8x8_basic.h)
