@@ -3,14 +3,14 @@
 #### Hardware
 
 - Arduino Uno
-- 11x MAX7219 Led display (8x8 leds)
+- 12x MAX7219 Led display (8x8 leds)
 - Wired like this _(source: the internet)_:
 <img src="https://user-images.githubusercontent.com/47608311/211937380-e48b0876-e36b-4873-9c20-ebee0466bb67.png" height="500px" />
 
 
 #### Notes on implementation
 
-- The LedControl library can only handle 8 displays chained. We have 11 displays so we have two chains of 8 and 3 displays.
+- The LedControl library can only handle 8 displays chained. We have 12 displays. 4 chains of each 3 displays. Displays are chained on the same bus, more displays on the same bus causes slow text scrolling. This is the reason they are split into 4 different busses with each only 3 displays.
 - To set or unset leds on the display:
     - `setLed(..., bool state)` sets one led on or off
     - `setRow(..., byte value)` sets a row of 8 leds, each led _i_ on or off depending on the bit _i_ of the `value`-byte

@@ -151,19 +151,21 @@ const PROGMEM char font8x8_basic[145][8] = {
 
 // strlen(text) < (buffer size - trailingWhitspace) / 8 - 1
 unsigned char *text = "\201 Welkom in de kelder! \201\0";
-byte allColumnBytes[1500];
+byte allColumnBytes[1300];
 size_t allColumnBytesSize;
 
 int trailingWhitespace = 6*8; // Four modules between loops
 int spaceWidth = 6;
 
 
-int amountOfScreens = 2;
-int screenSizes[2] = {
-  8,
+int amountOfScreens = 4;
+int screenSizes[4] = {
+  3,
+  3,
+  3,
   3
 };
-LedControl lcs[2] = {
+LedControl lcs[4] = {
 /* Create a new LedControl variable.
  * We use pins 12,11 and 10 on the Arduino for the SPI interface
  * Pin 12 is connected to the DATA IN-pin of the first MAX7221
@@ -171,10 +173,12 @@ LedControl lcs[2] = {
  * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
  * Amount of MAX7221 modules attached to the arduino 
  */
-  LedControl(12, 11, 10, screenSizes[0]),
-  LedControl(7, 6, 5, screenSizes[1])
+  LedControl(4, 2, 3, screenSizes[0]),
+  LedControl(7, 5, 6, screenSizes[1]),
+  LedControl(10, 8, 9, screenSizes[2]),
+  LedControl(13, 11, 12, screenSizes[3])
 };
-int totalLedSize = 11;
+int totalLedSize = 12;
 
 void setup() {
   Serial.begin(9600);
