@@ -285,7 +285,11 @@ void setRow(int screen, int row, byte data) {
   */
 void displaySlidingWindow(int currentStartIndex, int windowSize) {
   for (int i = 0; i < windowSize; i++) {
-    setRow(i/8, i%8, allColumnBytes[(currentStartIndex + i) % allColumnBytesSize]);
+    byte rowToSet = allColumnBytes[(currentStartIndex + i) % allColumnBytesSize];
+    // only set row if it is different than the previous row ( and thus the row that is currently being displayed )
+    if (rowToSet != allColumnBytes[(currentStartIndex + i - 1) % allColumnBytesSize]) {
+      setRow(i/8, i%8, rowToSet);
+    }
   }
 }
 
