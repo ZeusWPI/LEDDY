@@ -286,15 +286,38 @@ void setRow(int screen, int row, byte data) {
 void displaySlidingWindow(int currentStartIndex, int windowSize) {
   for (int i = 0; i < windowSize; i++) {
     byte rowToSet = allColumnBytes[(currentStartIndex + i) % allColumnBytesSize];
-    // only set row if it is different than the previous row ( and thus the row that is currently being displayed )
-    if (rowToSet != allColumnBytes[(currentStartIndex + i - 1) % allColumnBytesSize]) {
-      setRow(i/8, i%8, rowToSet);
+    // // only set row if it is different than the previous row ( and thus the row that is currently being displayed )
+    // if (rowToSet != allColumnBytes[(currentStartIndex + i - 1) % allColumnBytesSize]) {
+    //   setRow(i/8, i%8, rowToSet);
+    // }
+  }
+}
+
+/**
+  * Display the sliding window by choosing a subsection of the bytes (columns) to display.
+  */
+void displaySlidingWindowParallel(int currentStartIndex, int windowSize) {
+  // set row i of each matrix at the same time
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < amountOfScreens; j++ ) {
+      LedControl currentScreen = lcs[j];
+      int screenSize = screenSizes[j];
+      // make byte[] of values to set at rows
+      byte values[screenSize] = {};
+      for (int k = 0; k < screenSize; k++) {
+        values[k] = allColumnBytes[(currentStartIndex + j*screenSize*8 + k*8 + i) % allColumnBytesSize];          
+      }
+      currentScreen.setRowParallel(i, values);
     }
   }
 }
 
 int currentStartIndex = 0;
 void loop() {
-  displaySlidingWindow(currentStartIndex, totalLedSize*8);
+  //byte values[3] = {0xFF, 0xFF, 0xFF};
+  //lcs[0].setRowParallel(5, values);
+  displaySlidingWindowParallel(currentStartIndex, totalLedSize*8);
+  
+  //displaySlidingWindow(currentStartIndex, totalLedSize*8);
   currentStartIndex = (currentStartIndex + 1) % allColumnBytesSize;
 }
