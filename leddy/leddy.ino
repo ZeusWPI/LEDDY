@@ -298,8 +298,8 @@ void displaySlidingWindow(int currentStartIndex, int windowSize) {
   */
 void displaySlidingWindowParallel(int currentStartIndex, int windowSize) {
   // set row i of each matrix at the same time
-  for (int i = 0; i < 8; i++) {
-    for (int j = 0; j < amountOfScreens; j++ ) {
+  for (int j = 0; j < amountOfScreens; j++ ) {
+    for (int i = 0; i < 8; i++) {
       LedControl currentScreen = lcs[j];
       int screenSize = screenSizes[j];
       // make byte[] of values to set at rows
