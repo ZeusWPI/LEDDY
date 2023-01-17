@@ -19,6 +19,13 @@
 - We do some weird 'transposing' of the text string, so that the list of bytes to display are columns when looking at the led displays. To display what we call a sliding window, we just have to send the correct columns to the displays.
 - The font is originally from Marcel Sondaar, public domain, made available [here](https://github.com/dhepper/font8x8)
 
+#### Servy
+
+- ESP8266
+- [MicroPython installed](http://micropython.org/download/#esp8266)
+- Use the WebREPL in `servy/webrepl/webrepl.html` (submodule) to update or execute code on Servy.
+- IP: 10.1.0.181, WebREPL on ws://10.1.0.181:8266
+
 #### Development
 
 - Arduino IDE
