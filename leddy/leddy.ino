@@ -149,12 +149,12 @@ const PROGMEM char font8x8_basic[145][8] = {
     { 0x3C, 0x0C, 0x3C, 0x24, 0x3B, 0x2D, 0x2D, 0x24}    // U+0090 (unused, second half Zeus logo)
 };
 
-// strlen(text) < (buffer size - trailingWhitspace) / 8 - 1
-unsigned char *text = "\201 Welkom in de kelder! \201\0";
-byte allColumnBytes[1300];
-size_t allColumnBytesSize;
+unsigned char *text = "default LEDDY text \201\0";
+size_t allColumnBytesSize = 600;
+byte allColumnBytes[600]; // if text is 64 chars, then big enough
 
-int trailingWhitespace = 6*8; // Four modules between loops
+
+int trailingWhitespace = 4*8; // Four modules between loops
 int spaceWidth = 6;
 
 
@@ -192,6 +192,18 @@ void setup() {
     }
   }
 
+  preprocessString(text);
+}
+
+/**
+ *  Preprocess the text into the allColumnBytes buffer
+ */
+void preprocessString(unsigned char *text) {
+  // clear buffer, just to be sure
+  for (int i = 0; i < allColumnBytesSize; i++) {
+    allColumnBytes[i] = 0;
+  }
+  
   // setup allColumnBytes
   for (int i = 0; i < strlen(text); i++) {
     byte columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -201,6 +213,7 @@ void setup() {
     }
   }
 
+  // Squash space between letters
   int squashedSize = squashSpaces(allColumnBytes, strlen(text)*8);
   allColumnBytesSize = squashedSize + trailingWhitespace;
   for (int i = squashedSize; i < allColumnBytesSize; i++) {
@@ -312,7 +325,46 @@ void displaySlidingWindow(int currentStartIndex, int windowSize) {
 }
 
 int currentStartIndex = 0;
+const byte numChars = 64;
+char receivedChars[numChars];   // an array to store the received data
+boolean newData = false;
+
 void loop() {
+  recvWithEndMarker();
+  displayNewText();
   displaySlidingWindow(currentStartIndex, totalLedSize*8);  
   currentStartIndex = (currentStartIndex + 1) % allColumnBytesSize;
+}
+
+// source: https://forum.arduino.cc/t/serial-input-basics-updated/382007
+void recvWithEndMarker() {
+  static byte ndx = 0;
+  char endMarker = '\n';
+  char rc;
+  
+  while (Serial.available() > 0 && newData == false) {
+    rc = Serial.read();
+
+    if (rc != endMarker) {
+      receivedChars[ndx] = rc;
+      ndx++;
+      if (ndx >= numChars) {
+        ndx = numChars - 1;
+      }
+    }
+    else {
+      receivedChars[ndx] = '\0'; // terminate the string
+      ndx = 0;
+      newData = true;
+    }
+  }
+}
+
+void displayNewText() {
+  if (newData == true) {
+    Serial.print("Preprocessing text: ");
+    Serial.println(receivedChars);
+    preprocessString(receivedChars);        
+    newData = false;
+  }
 }
