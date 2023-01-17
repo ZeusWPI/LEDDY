@@ -148,8 +148,9 @@ const PROGMEM char font8x8_basic[145][8] = {
     { 0xFF, 0x98, 0xF4, 0x92, 0x71, 0x1F, 0x50, 0xA0},   // U+008F (unused, first half Zeus logo)
     { 0x3C, 0x0C, 0x3C, 0x24, 0x3B, 0x2D, 0x2D, 0x24}    // U+0090 (unused, second half Zeus logo)
 };
-
-unsigned char *text = "default LEDDY text \201\0";
+// zeus logo: \217\220
+// hartje: \201
+unsigned char *text = "\201 Welkom in de kelder! \201 \217\220\0";
 size_t allColumnBytesSize = 600;
 byte allColumnBytes[600]; // if text is 64 chars, then big enough
 
