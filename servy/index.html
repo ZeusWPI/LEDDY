@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LEDDY</title>
+    <style>
+noscript {
+    color: red;
+}
+
+#command {
+    width: 100%
+}
+
+.output-green p {
+    color: green;
+}
+
+.output-red p {
+    color: red;
+}
+    </style>
+</head>
+<body>
+
+    <h1>Control LEDDY</h1>
+
+    <noscript>This webpage requires Javascript to work</noscript>
+
+    <p>Input commands in the following text box:</p>
+    <form>
+        <input type="text" id="command" placeholder="ScrollingText Welkom in de kelder" />
+        <button type="submit" onClick="sendCommand(event)">Send command</button>
+    </form>
+
+    <br/>
+    <p id="output"></p>
+
+    <hr />
+    <p>
+        <span style="white-space: pre-wrap;">
+<b>Usage:</b>
+
+COMMAND [command opts ...]
+
+Commands:
+    <a href="#" onClick="input('ScrollingText ')">ScrollingText &lt;text&gt;</a>
+    <a href="#" onClick="input('ClearDisplay')">ClearDisplay</a>
+
+<small>Without using this client: HTTP Post to current URL with the command as plaintext body. End it with a newline.<br/>Example: $ echo "ScrollingText Zeus WPI" | http POST 10.1.0.181</small>
+        </span>
+    </p>
+
+    <script>
+function sendCommand(event) {
+    event.preventDefault();
+
+    let command = document.getElementById("command");
+    let output = document.getElementById("output");
+
+    fetch("/", {
+        method: "POST",
+        headers: {'Content-Type': 'text/plain'},
+        body: `${command.value || command.placeholder}\n`
+    }).then(res => {
+        output.classList.add(res.ok ? "output-green" : "output-red");
+        output.classList.remove(res.ok ? "output-red" : "output-green");
+        return res.text();
+    }).then(text => {
+        output.innerHTML = `LEDDY response: <p>    ${text.split('\n')[0]}</p>`;
+    });
+}
+
+function input(text) {
+    let command = document.getElementById("command");
+    command.value = text;
+    command.focus();
+}
+    </script>
+</body>
+</html>
+
