@@ -79,7 +79,7 @@ while True:
 
             # Send index.html
             conn.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-            conn.send(INDEX_HTML)
+            conn.sendall(INDEX_HTML)
         # Other request
         else:
             # Read headers (otherwise 'Connection ended')
