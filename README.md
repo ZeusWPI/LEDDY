@@ -43,12 +43,13 @@ $ echo "ScrollingText Welkom in de kelder!" | http POST 10.1.0.181
 - Running [MicroPython](https://docs.micropython.org/en/latest/esp8266/tutorial/intro.html#getting-the-firmware)
 - Write files to microcontroller. `boot.py` and `main.py` are executed on boot.
     1. Connected through serial with `ampy`:
-    ```bash
-    $ ampy -p /dev/ttyUSB0 -b 115200 put main.py main.py
-    # Or directly run file while developing
-    $ ampy -p /dev/ttyUSB0 -b 115200 run main.py
-    ```
-    2. Use the WebREPL in `servy/webrepl/webrepl.html` (submodule) to update or execute code on Servy. Connect with `ws://10.1.0.181:8266`
+        ```bash
+        $ ampy -p /dev/ttyUSB0 -b 115200 put main.py main.py
+        # Or directly run file while developing
+        $ ampy -p /dev/ttyUSB0 -b 115200 run main.py
+        ```
+    2. Use the WebREPL in `servy/webrepl/webrepl.html` (submodule) to update or execute code on Servy.
+        Connect with `ws://10.1.0.181:8266`. password = `led=demax`
 
 #### Development
 
