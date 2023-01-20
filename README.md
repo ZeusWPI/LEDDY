@@ -2,10 +2,10 @@
 
 #### Control LEDDY
 
-Currently only through HTTP POST requests.
-```
-Usage: HTTP Post with the following plaintext body:
+There is a **web interface on http://10.1.0.181** to control everything.
 
+There is also an API: send an HTTP POST request to http://10.1.0.181 with the following plaintext body:
+```
 COMMAND [command opts ...]
 
 Commands:
