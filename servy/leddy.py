@@ -1,16 +1,11 @@
-from machine import UART
+import machine
 
-uart = UART(1)
+uart = machine.UART(0, baudrate=9600)
 
 def scrolling_text(text):
     try:
-        print(1)
-        uart.init(baudrate=9600, tx=1, rx=None)
-        print(2)
-        uart.write(text)
-        print(3)
+        uart.write(text + "\n")
     except Exception as e:
-        print(e)
         raise Exception('Something went wrong while communicating over serial')
     return f"Displaying scrolling text \"{text}\""
 
