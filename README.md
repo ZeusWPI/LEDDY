@@ -57,7 +57,3 @@ $ echo "ScrollingText Welkom in de kelder!" | http POST 10.1.0.181
 - Dependencies:
     - Modified version of [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6. The files are included in this repository.
 
-#### Setup
-
-Simply clone this repository inside `~/Arduino` folder. Open `leddy/leddy.ino` inside the Arduino IDE and select your arduino board at the top of your editor.
-
