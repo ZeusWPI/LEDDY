@@ -94,7 +94,8 @@ void processString(unsigned char *text) {
 }
 
 void initScrollingText(unsigned char *text) {
-  processString(text);
+    currentTextIndex = 0;
+    processString(text);
 }
 
 void updateScrollingText() {

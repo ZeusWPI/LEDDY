@@ -5,10 +5,11 @@
   * Not used
   */
 void setRow(int screen, int row, byte data) {
-  int screenIndex = 0;
-  while (screen >= lcs[screenIndex].getDeviceCount()) {
-    screen -= lcs[screenIndex].getDeviceCount();
-    screenIndex++;
+  int screenIter = 0;
+  int screenNum = screen;
+  while (screenNum >= lcs[screenIter].getDeviceCount()) {
+    screenNum -= lcs[screenIter].getDeviceCount();
+    screenIter++;
   }
-  lcs[screenIndex].setRow(screen, row, data);
+  lcs[screenIter].setRow(screenNum, row, data);
 }

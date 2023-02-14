@@ -19,6 +19,7 @@ COMMAND [command opts ...]
 Commands:
     ScrollingText <text>
     ClearDisplay
+    FillDisplay
 ---
 """
 
@@ -36,6 +37,8 @@ def process_body(body: str) -> str:
         raise Exception("No text to display")
     elif command == "ClearDisplay":
         return leddy.clear_display()
+    elif command == "FillDisplay":
+        return leddy.fill_display()
 
     raise Exception(f"No such command: \"{command}\"")
 
@@ -49,7 +52,7 @@ while True:
         line = conn.readline()
         print(f'[MAIN] Request: {line}')
         # POST request (to root)
-        if line[:7] == b'POST / ':
+        if line[:7] == b'POST / ' or line[:7] == b'POST /?':
             # Read headers
             while line and line not in [b'\n', b'\r\n']:
                 line = conn.readline()
@@ -72,7 +75,7 @@ while True:
             conn.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
             conn.send(reply)
         # GET request (to root)
-        elif line[:6] == b'GET / ':
+        elif line[:6] == b'GET / ' or line[:6] == b'GET /?':
             # Read headers
             while line and line != b'\r\n':
                 line = conn.readline()

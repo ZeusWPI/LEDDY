@@ -20,4 +20,9 @@ LedControl lcs[4] = {
 };
 int totalLedSize = 12;
 
+enum mode_t {
+  SCROLLING_TEXT,
+  STATIC
+};
+
 #endif /* GLOBALS_H_ */

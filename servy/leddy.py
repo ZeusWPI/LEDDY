@@ -4,12 +4,22 @@ uart = machine.UART(0, baudrate=9600)
 
 def scrolling_text(text):
     try:
-        uart.write(text + "\n")
+        uart.write(f"1{str(text)}\n")
     except Exception as e:
         raise Exception('Something went wrong while communicating over serial')
     return f"Displaying scrolling text \"{text}\""
 
 def clear_display():
-    # TODO
+    try:
+        uart.write("0ClearDisplay\n")
+    except Exception as e:
+        raise Exception('Something went wrong while communicating over serial')
     return f"Cleared display"
+
+def fill_display():
+    try:
+        uart.write("0FillDisplay\n")
+    except Exception as e:
+        raise Exception('Something went wrong while communicating over serial')
+    return f"Filled display"
 

@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "ledcontrol/LedControl.cpp" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 #include "functionality/text/text.c"
+#include "functionality/utility.c"
 
 void setup() {
   Serial.begin(9600);
@@ -18,38 +19,52 @@ void setup() {
   initScrollingText(text);
 }
 
-const byte maxNumChars = 64;
-char receiveBuffer[maxNumChars];   // an array to store the received data
+enum mode_t mode = SCROLLING_TEXT;
 
 void loop() {
   receiveSerial();
-  updateScrollingText();
+  if (mode == SCROLLING_TEXT) {
+    updateScrollingText();
+  }
 }
+
+const int maxNumChars = 64;
+int receiveIndex = 0;
+char receiveBuffer[maxNumChars];   // an array to store the received data
 
 // source: https://forum.arduino.cc/t/serial-input-basics-updated/382007
 char** receiveSerial() {
-  int index = 0;
   char r_char;
 
   while (Serial.available() > 0) {
     r_char = Serial.read();
 
-    if (r_char == '\n') { break; }
-
-    receiveBuffer[index] = r_char;
-    index++;
-    if (index >= maxNumChars) {
-      index = maxNumChars - 1;
+    if (r_char == '\n') {
+      receiveBuffer[receiveIndex] = '\0'; // Terminate the string
+      if (receiveIndex > 0) {
+        receiveIndex = 0;
+        processCommand();
+      }
+      return;
     }
-  }
-  receiveBuffer[index] = '\0'; // Terminate the string
-  if (index > 0) {
-    processCommand();
+
+    receiveBuffer[receiveIndex] = r_char;
+    receiveIndex++;
+    if (receiveIndex >= maxNumChars) {
+      receiveIndex = maxNumChars - 1;
+    }
   }
 }
 
 void processCommand() {
-  Serial.print("Preprocessing text: ");
-  Serial.println(receiveBuffer);
-  processString(receiveBuffer);
+  // Serial.print("Processing text: ");
+  // Serial.println(receiveBuffer);
+
+  if (receiveBuffer[0] == '1') {
+    initScrollingText(receiveBuffer+1);
+    mode = SCROLLING_TEXT;
+  } else if (receiveBuffer[0] == '0') {
+    processUtilCommand(receiveBuffer+1);
+    mode = STATIC;
+  }
 }
