@@ -50,13 +50,14 @@ for(i = [6 : 11]) {
 }
 
 // clips to connect parts
-error = 0.3; // dont make it perfectly fit, make it a bit bigger
+// ** cursed shit incoming **
+error = 1; 
 clip_width = 2 + 2*d_edge_to_start_of_cut_out + error;
 clip_height = 5;
-
-#translate([6*base_width - d_edge_to_start_of_cut_out - 1 - error/2,30,-1]) {
+translate([6*base_width - d_edge_to_start_of_cut_out - 1 - error/2,30,-1]) {
     difference() {
         cube([clip_width, clip_height, 2]);
-        translate([1,-1,1]) {cube([clip_width-2, clip_height+2, 2]);};
+        // yes i use cylinder with $fn=4 to make a cube like shape lol, notice the difference between r1 and r2 to create the cutout slant
+        translate([6.8,0,1]) {rotate([0,0,45]) {cylinder(h=2, r1=(15+error)/2, r2=(15+error)/2-1, $fn=4);};};
     }
 };
