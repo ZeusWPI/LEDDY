@@ -93,12 +93,12 @@ void processString(unsigned char *text) {
     }
 }
 
-void initScrollingText(unsigned char *text) {
+void initText(unsigned char *text) {
     currentTextIndex = 0;
     processString(text);
 }
 
-void updateScrollingText() {
+void scrollText() {
     int bufferIndex = currentTextIndex;
     // for each screen
     for (int screenIndex = 0; screenIndex < amountOfScreens; screenIndex++) {

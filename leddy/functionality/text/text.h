@@ -16,11 +16,11 @@ int currentTextIndex = 0;
 /**
   * Initialize ScrollingText
   */
-void initScrollingText(unsigned char* text);
+void initText(unsigned char* text);
 
 /**
   * Draw ScrollingText and move it one over
   */
-void updateScrollingText();
+void scrollText();
 
 #endif /* TEXT_H_ */

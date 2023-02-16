@@ -16,7 +16,7 @@ void setup() {
   }
 
   unsigned char *text = "\201 Welkom in de kelder! \201 \217\220\0";
-  initScrollingText(text);
+  initText(text);
 }
 
 enum mode_t mode = SCROLLING_TEXT;
@@ -24,7 +24,7 @@ enum mode_t mode = SCROLLING_TEXT;
 void loop() {
   receiveSerial();
   if (mode == SCROLLING_TEXT) {
-    updateScrollingText();
+    scrollText();
   }
 }
 
@@ -59,12 +59,14 @@ char** receiveSerial() {
 void processCommand() {
   // Serial.print("Processing text: ");
   // Serial.println(receiveBuffer);
-
-  if (receiveBuffer[0] == '1') {
-    initScrollingText(receiveBuffer+1);
-    mode = SCROLLING_TEXT;
-  } else if (receiveBuffer[0] == '0') {
+  if (receiveBuffer[0] == '0') {
     processUtilCommand(receiveBuffer+1);
+    mode = STATIC;
+  } else if (receiveBuffer[0] == '1') {
+    initText(receiveBuffer+1);
+    mode = SCROLLING_TEXT;
+  } else if (receiveBuffer[0] == '2') {
+    initText(receiveBuffer+1);
     mode = STATIC;
   }
 }
