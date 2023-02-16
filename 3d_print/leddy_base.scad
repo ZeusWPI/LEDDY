@@ -61,3 +61,15 @@ translate([6*base_width - d_edge_to_start_of_cut_out - 1 ,30,-1]) {
     translate([1,0,2.5]) {cube([0.5, clip_height, 1]);};
     translate([1 + 2*d_edge_to_start_of_cut_out-0.5,0,2.5]) {cube([0.5, clip_height, 1]);};
 }
+
+// clip to go on top 
+top_clip_border = d_edge_to_side_of_holes;
+top_clip_width = 2 * d_edge_to_center_of_holes + 2 * hole_radius + 2*top_clip_border;
+top_clip_hole_error = 0.05;
+#difference() {
+    cube([top_clip_width, 2*d_edge_to_center_of_holes , 1]);
+    union() {
+        translate([top_clip_border+hole_radius,top_clip_border+hole_radius, -1]) {cylinder(pin_height, hole_radius + top_clip_hole_error, hole_radius+top_clip_hole_error, $fn=50);}
+        translate([top_clip_border+hole_radius + 2*d_edge_to_center_of_holes, top_clip_border+hole_radius, -1]) {cylinder(pin_height, hole_radius+top_clip_hole_error, hole_radius+top_clip_hole_error, $fn=50);}
+    }
+}
