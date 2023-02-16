@@ -17,6 +17,7 @@ Usage: HTTP Post with the following plaintext body:
 COMMAND [command opts ...]
 
 Commands:
+    Text <text>
     ScrollingText <text>
     ClearDisplay
     FillDisplay
@@ -30,6 +31,11 @@ index_file.close()
 
 def process_body(body: str) -> str:
     command = body.split(' ')[0]
+    if command == "Text":
+        text = body[len(command)+1:] # +1 for space
+        if text:
+            return leddy.text(text)
+        raise Exception("No text to display")
     if command == "ScrollingText":
         text = body[len(command)+1:] # +1 for space
         if text:
