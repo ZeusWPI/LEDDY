@@ -23,8 +23,13 @@ enum mode_t mode = SCROLLING_TEXT;
 
 void loop() {
   receiveSerial();
-  if (mode == SCROLLING_TEXT) {
-    scrollText();
+  switch (mode) {
+    case SCROLLING_TEXT:
+      scrollText();
+      renderText();
+      break;
+    default:
+      break;
   }
 }
 
@@ -59,14 +64,23 @@ char** receiveSerial() {
 void processCommand() {
   // Serial.print("Processing text: ");
   // Serial.println(receiveBuffer);
-  if (receiveBuffer[0] == '0') {
-    processUtilCommand(receiveBuffer+1);
-    mode = STATIC;
-  } else if (receiveBuffer[0] == '1') {
-    initText(receiveBuffer+1);
-    mode = SCROLLING_TEXT;
-  } else if (receiveBuffer[0] == '2') {
-    initText(receiveBuffer+1);
-    mode = STATIC;
+
+  switch (receiveBuffer[0]) {
+    case '0':
+      processUtilCommand(receiveBuffer+1);
+      mode = STATIC;
+      break;
+    case '1':
+      initText(receiveBuffer+1);
+      renderText();
+      mode = SCROLLING_TEXT;
+      break;
+    case '2':
+      initText(receiveBuffer+1, true);
+      renderText();
+      mode = STATIC;
+      break;
+    default:
+      break;
   }
 }

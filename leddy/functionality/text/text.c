@@ -70,7 +70,7 @@ int squashSpaces(byte *buffer, int length) {
 /**
  *  Preprocess the text into the textBuffer buffer
  */
-void processString(unsigned char *text) {
+void processString(unsigned char *text, bool padBuffer = false) {
     // clear buffer, just to be sure
     for (int i = 0; i < textBufferSize; i++) {
         textBuffer[i] = 0;
@@ -88,17 +88,24 @@ void processString(unsigned char *text) {
     // Squash space between letters
     int squashedSize = squashSpaces(textBuffer, strlen(text) * 8);
     textBufferSize = squashedSize + trailingWhitespace;
+    if (padBuffer) {
+        textBufferSize = 12 * 8;
+    }
     for (int i = squashedSize; i < textBufferSize; i++) {
         textBuffer[i] = 0;
     }
 }
 
-void initText(unsigned char *text) {
+void initText(unsigned char *text, bool padBuffer = false) {
     currentTextIndex = 0;
-    processString(text);
+    processString(text, padBuffer);
 }
 
 void scrollText() {
+    currentTextIndex = (currentTextIndex + 1) % textBufferSize;
+}
+
+void renderText() {
     int bufferIndex = currentTextIndex;
     // for each screen
     for (int screenIndex = 0; screenIndex < amountOfScreens; screenIndex++) {
@@ -109,5 +116,4 @@ void scrollText() {
         }
         bufferIndex += 8*lcs[screenIndex].getDeviceCount();
     }
-    currentTextIndex = (currentTextIndex + 1) % textBufferSize;
 }

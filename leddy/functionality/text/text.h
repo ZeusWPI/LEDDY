@@ -7,20 +7,26 @@
 size_t textBufferSize = 600;
 byte textBuffer[600]; // if text is 64 chars, then big enough
 
-int trailingWhitespace = 4 * 8; // Four modules between loops
+int trailingWhitespace = 6 * 8; // Four modules between loops
 int spaceWidth = 6;
 int currentTextIndex = 0;
 // GLOBAL TEXT VARS
 
 
 /**
-  * Initialize ScrollingText
+  * Initialize the `text` buffer
+  *   padBuffer: pad the text buffer with spaces to fille the whole screen
   */
-void initText(unsigned char* text);
+void initText(unsigned char* text, bool padBuffer = false);
 
 /**
-  * Draw ScrollingText and move it one over
+  * Move the Text one over
   */
 void scrollText();
+
+/**
+  * Draw the `text` buffer
+  */
+void renderText();
 
 #endif /* TEXT_H_ */
