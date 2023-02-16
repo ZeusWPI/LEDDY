@@ -4,6 +4,7 @@
 #include "font.h"
 
 // GLOBAL TEXT VARS
+char text[100] = {0};
 size_t textBufferSize = 600;
 byte textBuffer[600]; // if text is 64 chars, then big enough
 

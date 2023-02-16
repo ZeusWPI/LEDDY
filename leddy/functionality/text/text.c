@@ -96,7 +96,11 @@ void processString(unsigned char *text, bool padBuffer = false) {
     }
 }
 
-void initText(unsigned char *text, bool padBuffer = false) {
+void initText(unsigned char *newText, bool padBuffer = false) {
+    if (newText) {
+        strcpy(text, newText);
+        text[strlen(newText)] = '\0';
+    }
     currentTextIndex = 0;
     processString(text, padBuffer);
 }

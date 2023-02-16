@@ -1,7 +1,9 @@
 #include "globals.h"
+#include "timer.h"
 #include "ledcontrol/LedControl.cpp" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 #include "functionality/text/text.c"
 #include "functionality/utility.c"
+#include "functionality/options.c"
 
 void setup() {
   Serial.begin(9600);
@@ -21,12 +23,18 @@ void setup() {
 
 enum mode_t mode = SCROLLING_TEXT;
 
+unsigned long lastUpdate = getCurrentTime();
+unsigned long updateDelayMs = 0;
+
 void loop() {
   receiveSerial();
   switch (mode) {
     case SCROLLING_TEXT:
-      scrollText();
-      renderText();
+      if (updateDelayMs == 0 || (getCurrentTime() - lastUpdate) > updateDelayMs) {
+        scrollText();
+        renderText();
+        lastUpdate = getCurrentTime();
+      }
       break;
     default:
       break;
@@ -66,19 +74,22 @@ void processCommand() {
   // Serial.println(receiveBuffer);
 
   switch (receiveBuffer[0]) {
-    case '0':
+    case 'U':
       processUtilCommand(receiveBuffer+1);
       mode = STATIC;
       break;
-    case '1':
+    case 'T':
+      initText(receiveBuffer+1, true);
+      renderText();
+      mode = STATIC;
+      break;
+    case 'S':
       initText(receiveBuffer+1);
       renderText();
       mode = SCROLLING_TEXT;
       break;
-    case '2':
-      initText(receiveBuffer+1, true);
-      renderText();
-      mode = STATIC;
+    case 'O':
+      processOption(receiveBuffer+1);
       break;
     default:
       break;
