@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "timer.h"
+#include "time.h"
 #include "ledcontrol/LedControl.cpp" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 #include "functionality/text/text.c"
 #include "functionality/utility.c"
@@ -24,7 +24,6 @@ void setup() {
 enum mode_t mode = SCROLLING_TEXT;
 
 unsigned long lastUpdate = getCurrentTime();
-unsigned long updateDelayMs = 0;
 
 void loop() {
   receiveSerial();

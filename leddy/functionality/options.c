@@ -23,5 +23,9 @@ void processOption(char *option) {
     trailingWhitespace = val * 8;
     initText(nullptr);  // NULL => Use same text
     renderText();
+  } else if (!strncmp(option, "updateDelayMs ", 14)) {
+    int val = charsToInt(option + 14);
+    if (val < 0) { return; }
+    updateDelayMs = val;
   }
 }

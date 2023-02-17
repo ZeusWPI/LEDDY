@@ -25,4 +25,6 @@ enum mode_t {
   STATIC
 };
 
+unsigned long updateDelayMs = 0;
+
 #endif /* GLOBALS_H_ */
