@@ -19,8 +19,13 @@ COMMAND [command opts ...]
 Commands:
     Text <text>
     ScrollingText <text>
+
     ClearDisplay
     FillDisplay
+
+    Option text_spaceWidth <width>
+    Option text_trailingWhitespace <spaces>
+    Option updateDelayMs <milliseconds>
 ---
 """
 
@@ -32,12 +37,12 @@ index_file.close()
 def process_body(body: str) -> str:
     command = body.split(' ')[0]
     if command == "Text":
-        text = body[len(command)+1:] # +1 for space
+        text = body[len(command)+1:]  # +1 for space
         if text:
             return leddy.text(text)
         raise Exception("No text to display")
-    if command == "ScrollingText":
-        text = body[len(command)+1:] # +1 for space
+    elif command == "ScrollingText":
+        text = body[len(command)+1:]  # +1 for space
         if text:
             return leddy.scrolling_text(text)
         raise Exception("No text to display")
@@ -45,6 +50,8 @@ def process_body(body: str) -> str:
         return leddy.clear_display()
     elif command == "FillDisplay":
         return leddy.fill_display()
+    elif command == "Option":
+        return leddy.option(body[len(command)+1:])  # +1 for space
 
     raise Exception(f"No such command: \"{command}\"")
 

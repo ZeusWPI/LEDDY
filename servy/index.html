@@ -45,10 +45,15 @@ COMMAND [command opts ...]
 Commands:
     <a href="#" onClick="input('Text ')">Text &lt;text&gt;</a>
     <a href="#" onClick="input('ScrollingText ')">ScrollingText &lt;text&gt;</a>
+
     <a href="#" onClick="inputAndSend('ClearDisplay')">ClearDisplay</a>
     <a href="#" onClick="inputAndSend('FillDisplay')">FillDisplay</a>
 
-<small>Without using this client: HTTP Post to current URL with the command as plaintext body. End it with a newline.<br/>Example: $ echo "ScrollingText Zeus WPI" | http POST 10.1.0.181</small>
+    <a href="#" onClick="input('Option text_spaceWidth ')">Option text_spaceWidth &lt;width&gt;</a>
+    <a href="#" onClick="input('Option text_trailingWhitespace ')">Option text_trailingWhitespace &lt;spaces&gt;</a>
+    <a href="#" onClick="input('Option updateDelayMs ')">Option updateDelayMs &lt;milliseconds&gt;</a>
+
+<small>Other client: HTTP Post to current URL with the command as plaintext body. End it with a newline.<br/>Example: $ echo "ScrollingText Zeus WPI" | http POST 10.1.0.181</small>
         </span>
     </p>
 
