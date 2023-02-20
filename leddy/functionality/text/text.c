@@ -106,7 +106,7 @@ void initText(unsigned char *newText, bool padBuffer = false) {
 }
 
 void scrollText() {
-    currentTextIndex = (currentTextIndex + 1) % textBufferSize;
+    currentTextIndex = (currentTextIndex + 1*scrollDirection + textBufferSize) % textBufferSize;
 }
 
 void renderText() {

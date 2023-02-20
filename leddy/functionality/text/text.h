@@ -11,6 +11,7 @@ byte textBuffer[600]; // if text is 64 chars, then big enough
 int trailingWhitespace = 6 * 8; // Four modules between loops
 int spaceWidth = 6;
 int currentTextIndex = 0;
+int scrollDirection = 1;
 // GLOBAL TEXT VARS
 
 
