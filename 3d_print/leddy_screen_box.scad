@@ -38,3 +38,12 @@ translate([-box_width,0,0]) {
     }
     
 };
+
+// pins
+pin_error=0.15;
+module pin() {
+    pin_thickness = hole_thickness-pin_error;
+    cube([pin_thickness, box_height, pin_thickness]);
+    translate([-1,-1,0]) {cube([pin_thickness+2, 1, pin_thickness+1]);};
+}
+
