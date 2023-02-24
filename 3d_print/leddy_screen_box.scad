@@ -36,7 +36,7 @@ module box() {
             
             // holes
             for(i = [0:nr_of_holes-1]) {
-                #translate([border_size+holes_spacing/2 + i*holes_spacing - hole_thickness/2,-1,d_holes_to_bottom]) {cube([hole_thickness, box_height+2, hole_thickness]);};
+                translate([border_size+holes_spacing/2 + i*holes_spacing - hole_thickness/2,-1,d_holes_to_bottom]) {cube([hole_thickness, box_height+2, hole_thickness]);};
             }
         }
         
@@ -45,30 +45,44 @@ module box() {
 
 screen_and_pcb_thickness = 12.5;
 cover_thickness = 1;
-cover_support_pins_height = box_thickness - d_holes_to_bottom - hole_thickness - screen_and_pcb_thickness - cover_thickness;
+cover_support_pins_height = box_thickness - d_holes_to_bottom - hole_thickness - screen_and_pcb_thickness - cover_thickness +1; // +1 om een beetje spanning te geven
 d_cover_sopport_pin_from_top = d_top_of_screen_to_top_of_box + 25;
 module cover() {
     translate([-box_width+1,1,d_holes_to_bottom+hole_thickness]) {
         cube([box_width-2, box_height-2, cover_thickness]);
         for(i = [0:nr_of_screens-1]) {
             translate([border_size+screen_width/2 + i*screen_width,box_height-d_cover_sopport_pin_from_top,cover_thickness]) {
-                cylinder(cover_support_pins_height,3,3);
+                cylinder(cover_support_pins_height,3,3,$f=10);
             }
         }
     };
     
 }
-#cover();
 
 // pins
 pin_error=0.15;
 module pin() {
     pin_thickness = hole_thickness-pin_error;
-    cube([pin_thickness, box_height, pin_thickness]);
+    difference () {
+        cube([pin_thickness, box_height+2, pin_thickness]);
+        translate([pin_thickness/2,box_height,-1]) { cylinder(h=pin_thickness+2,r1=0.5,r2=0.5,$fn=10);}
+    }
     translate([-1,-1,0]) {cube([pin_thickness+2, 1, pin_thickness+1]);};
-    
 }
-box();
 
+// split the box in 2
+module left_box() {
+    difference() {
+        box();
+        translate([-box_width/2,-1,-1]) cube([box_width/2+1,box_height+2,box_thickness+2]);
+    }
+}
+module right_box() {
+    difference() {
+        box();
+        translate([-box_width-1,-1,-1]) cube([box_width/2+1,box_height+2,box_thickness+2]);
+    }
+}
 
-
+right_box();
+left_box();
