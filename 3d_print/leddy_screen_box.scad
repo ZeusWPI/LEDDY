@@ -71,18 +71,45 @@ module pin() {
 }
 
 // split the box in 2
+d_connector_to_bottom = d_holes_to_bottom+hole_thickness;
+connector_thickness = box_thickness-d_connector_to_bottom-1;
+connector_width = 5;
 module left_box() {
     difference() {
         box();
         translate([-box_width/2,-1,-1]) cube([box_width/2+1,box_height+2,box_thickness+2]);
     }
+    
+    // connector
+    #translate([-box_width/2-connector_width,1,d_connector_to_bottom]) {
+        cube([connector_width,connector_width,connector_thickness]);
+        translate([0,box_height-connector_width-2,0]) {cube([connector_width,connector_width,connector_thickness]);}
+    }
 }
+//left_box();
+connector_error = 0.15; // distance between 2 pieces of the connector when they fit together
 module right_box() {
     difference() {
         box();
         translate([-box_width-1,-1,-1]) cube([box_width/2+1,box_height+2,box_thickness+2]);
     }
+    
+    // connector
+    cube_width = 16;
+    cube_height = 10;
+    difference() {
+        translate([-box_width/2-cube_width/2,1,d_connector_to_bottom]) cube([cube_width,cube_height,connector_thickness]);
+        translate([-box_width/2-connector_width-connector_error,0,d_connector_to_bottom-1]) {
+            cube([connector_width+2*connector_error,connector_width+connector_error+1,connector_thickness+2]);
+        }
+    };
+    difference() {
+        translate([-box_width/2-cube_width/2,box_height-cube_height-1,d_connector_to_bottom]) cube([cube_width,10,connector_thickness]);
+        translate([-box_width/2-connector_width-connector_error,box_height-connector_width-1-connector_error,d_connector_to_bottom-1]) {
+            cube([connector_width+2*connector_error,connector_width+connector_error+1,connector_thickness+2]);
+        }
+    };
 }
 
-right_box();
 left_box();
+right_box();
