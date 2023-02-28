@@ -111,5 +111,19 @@ module right_box() {
     };
 }
 
-left_box();
-right_box();
+cable_hole_width = 20;
+cable_hole_thickness = 10;
+d_top_to_hole = 5;
+module cable_hole() {
+    translate([-box_width/2-cable_hole_width/2,-1,box_thickness-d_top_to_hole-1-cable_hole_thickness]) {cube([cable_hole_width, cable_hole_thickness+3, cable_hole_thickness]);};
+}
+
+difference() {
+    left_box();
+    cable_hole();
+}
+difference() {
+    right_box();
+    cable_hole();
+}
+    
