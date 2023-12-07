@@ -30,6 +30,13 @@ def fill_display():
         raise Exception('Something went wrong while communicating over serial')
     return "Filled display"
 
+def audio():
+    try:
+        uart.write("A\n")
+    except Exception as e:
+        raise Exception('Something went wrong while communicating over serial')
+    return "Enabled audio"
+
 def option(option):
     try:
         uart.write(f"O{str(option)}\n")

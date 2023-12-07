@@ -23,6 +23,8 @@ Commands:
     ClearDisplay
     FillDisplay
 
+    Audio
+
     Option text_spaceWidth <width>
     Option text_trailingWhitespace <spaces>
     Option updateDelayMs <milliseconds>
@@ -52,6 +54,8 @@ def process_body(body: str) -> str:
         return leddy.clear_display()
     elif command == "FillDisplay":
         return leddy.fill_display()
+    elif command == "Audio":
+        return leddy.audio()
     elif command == "Option":
         return leddy.option(body[len(command)+1:])  # +1 for space
 
