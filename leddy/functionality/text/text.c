@@ -6,14 +6,14 @@
 /**
  * Helper function to get a bit from a byte.
  */
-bool getBit(byte input, int bit) {
+inline bool getBit(byte input, int bit) {
   return (input & (0x80 >> bit)) > 0;
 }
 
 /**
  * Helper function to change a bit in a byte.
  */
-byte setBit(byte input, int bit, bool value) {
+inline byte setBit(byte input, int bit, bool value) {
     byte mask = value << (7 - bit);  // example 00010000
     return (input & (~mask)) | mask;
 }

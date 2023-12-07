@@ -1,25 +1,13 @@
 #include "utility.h"
 
 void processUtilCommand(char *command) {
-  if (!strcmp(command, "ClearDisplay")) {
-    clearDisplay();
-  } else if (!strcmp(command, "FillDisplay")) {
-    fillDisplay();
-  }
+  fillDisplay(strcmp(command, "ClearDisplay") != 0);
 }
 
-void clearDisplay() {
+void fillDisplay(int filled) {
   for (int screen = 0; screen < totalLedSize; screen++) {
     for (int row = 0; row < 8; row++) {
-      setRow(screen, row, 0x00);
-    }
-  }
-}
-
-void fillDisplay() {
-  for (int screen = 0; screen < totalLedSize; screen++) {
-    for (int row = 0; row < 8; row++) {
-      setRow(screen, row, 0xFF);
+      setRow(screen, row, filled ? 0xFF: 0x00);
     }
   }
 }

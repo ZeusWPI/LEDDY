@@ -4,9 +4,9 @@
 #include "font.h"
 
 // GLOBAL TEXT VARS
-char text[100] = {0};
-size_t textBufferSize = 600;
-byte textBuffer[600]; // if text is 64 chars, then big enough
+char text[50] = {0};
+size_t textBufferSize = 460;
+byte textBuffer[460]; // if text is 64 chars, then big enough
 
 int trailingWhitespace = 6 * 8; // Four modules between loops
 int spaceWidth = 6;

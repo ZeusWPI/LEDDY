@@ -2,6 +2,7 @@
 #include "time.h"
 #include "ledcontrol/LedControl.cpp" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
 #include "functionality/text/text.c"
+#include "functionality/audio/audio.c"
 #include "functionality/utility.c"
 #include "functionality/options.c"
 
@@ -25,8 +26,10 @@ enum mode_t mode = SCROLLING_TEXT;
 
 unsigned long lastUpdate = getCurrentTime();
 
+
 void loop() {
   receiveSerial();
+
   switch (mode) {
     case SCROLLING_TEXT:
       if (updateDelayMs == 0 || (getCurrentTime() - lastUpdate) > updateDelayMs) {
@@ -35,12 +38,17 @@ void loop() {
         lastUpdate = getCurrentTime();
       }
       break;
+    case STATIC:
+      break;
+    case AUDIO:
+      renderAudio();
+      break;
     default:
       break;
   }
 }
 
-const int maxNumChars = 64;
+const int maxNumChars = 50;
 int receiveIndex = 0;
 char receiveBuffer[maxNumChars];   // an array to store the received data
 
@@ -86,6 +94,9 @@ void processCommand() {
       initText(receiveBuffer+1);
       renderText();
       mode = SCROLLING_TEXT;
+      break;
+    case 'A':
+      mode = AUDIO;
       break;
     case 'O':
       processOption(receiveBuffer+1);

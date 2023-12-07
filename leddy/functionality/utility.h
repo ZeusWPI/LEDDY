@@ -3,8 +3,6 @@
 
 void processUtilCommand(char *command);
 
-void clearDisplay();
-
-void fillDisplay();
+void fillDisplay(int filled);
 
 #endif /* UTILITY_H_ */

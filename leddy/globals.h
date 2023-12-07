@@ -22,7 +22,8 @@ int totalLedSize = 12;
 
 enum mode_t {
   SCROLLING_TEXT,
-  STATIC
+  STATIC,
+  AUDIO
 };
 
 unsigned long updateDelayMs = 0;
