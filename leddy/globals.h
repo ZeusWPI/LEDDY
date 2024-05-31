@@ -27,5 +27,6 @@ enum mode_t {
 };
 
 unsigned long updateDelayMs = 0;
+unsigned long autoResetMs = 0;
 
 #endif /* GLOBALS_H_ */

@@ -6,6 +6,11 @@
 #include "functionality/utility.c"
 #include "functionality/options.c"
 
+const unsigned char *defaultText = "\201 Welkom in de kelder! \201 \217\220\0";
+
+bool isReset = false;
+enum mode_t mode = SCROLLING_TEXT;
+
 void setup() {
   Serial.begin(9600);
 
@@ -18,17 +23,17 @@ void setup() {
     }
   }
 
-  unsigned char *text = "\201 Welkom in de kelder! \201 \217\220\0";
-  initText(text);
+  reset();
 }
 
-enum mode_t mode = SCROLLING_TEXT;
-
 unsigned long lastUpdate = getCurrentTime();
-
+unsigned long lastContentChange = getCurrentTime();
 
 void loop() {
   receiveSerial();
+
+  if (!isReset && autoResetMs > 0 && (getCurrentTime() - lastContentChange) > autoResetMs)
+    reset();
 
   switch (mode) {
     case SCROLLING_TEXT:
@@ -46,6 +51,17 @@ void loop() {
     default:
       break;
   }
+}
+
+void reset() {
+  initText(defaultText);
+  mode = SCROLLING_TEXT;
+  isReset = true;
+}
+
+void contentChanged() {
+  lastContentChange = getCurrentTime();
+  isReset = false;
 }
 
 const int maxNumChars = 50;
@@ -84,19 +100,23 @@ void processCommand() {
     case 'U':
       processUtilCommand(receiveBuffer+1);
       mode = STATIC;
+      contentChanged();
       break;
     case 'T':
       initText(receiveBuffer+1, true);
       renderText();
       mode = STATIC;
+      contentChanged();
       break;
     case 'S':
       initText(receiveBuffer+1);
       renderText();
       mode = SCROLLING_TEXT;
+      contentChanged();
       break;
     case 'A':
       mode = AUDIO;
+      contentChanged();
       break;
     case 'O':
       processOption(receiveBuffer+1);
