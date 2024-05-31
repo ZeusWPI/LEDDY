@@ -38,5 +38,9 @@ void processOption(char *option) {
     long val = charsToInt(option + 14);
     if (val < 0) { return; }
     updateDelayMs = val;
+  } else if (!strncmp(option, "autoResetMs ", 12)) {
+    long val = charsToInt(option + 12);
+    if (val < 0) { return; }
+    autoResetMs = val;
   }
 }
