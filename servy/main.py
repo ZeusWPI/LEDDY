@@ -4,7 +4,7 @@ import machine
 import network
 import socket
 import time
-import os
+import uos
 import webrepl
 
 def connect_wifi() -> None:
@@ -24,9 +24,6 @@ def connect_wifi() -> None:
 def start_webrepl() -> None:
     # Start webrepl on port 8266
     webrepl.start()
-
-def load_defaults():
-
 
 def main() -> None:
     s = listen()
@@ -141,5 +138,4 @@ def process_body(body: str) -> str:
 
 connect_wifi()
 start_webrepl()
-load_defaults()
 main()
