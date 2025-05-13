@@ -8,6 +8,7 @@ import uos
 import webrepl
 
 def connect_wifi() -> None:
+    network.hostname("leddy")
     # Disable access point
     interface = network.WLAN(network.AP_IF)
     interface.active(False)
