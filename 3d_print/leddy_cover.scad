@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+
 //#cube([31.82, 31.82, 7.13]);
 base_width = 32.3;
 base_height = 50.22;
