@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "functionality/text/font.hpp"
 
-#ifndef FONT_H_
-#define FONT_H_
-
-const PROGMEM char font8x8_basic[145][8] = {
+const PROGMEM unsigned char font8x8_basic[145][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0001
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0002
@@ -153,5 +151,3 @@ const PROGMEM char font8x8_basic[145][8] = {
 };
 // zeus logo: \217\220
 // hartje: \201
-
-#endif /* FONT_H_ */

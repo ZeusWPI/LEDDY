@@ -1,15 +1,37 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "leddy.hpp"
 
-#include "globals.h"
-#include "time.h"
-#include "ledcontrol/LedControl.cpp" // LedControl by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6
-#include "functionality/text/text.c"
-#include "functionality/audio/audio.c"
-#include "functionality/utility.c"
-#include "functionality/options.c"
+#include <time.h>
 
-const unsigned char *defaultText = "\201 Welkom in de kelder! \201 \217\220\0";
+#include "functionality/audio/audio.hpp"
+#include "functionality/options.hpp"
+#include "functionality/text/text.hpp"
+#include "functionality/utils.hpp"
+#include "led_control/led_control.hpp"
+
+int amountOfScreens = 4;
+
+LedControl lcs[4] = {
+/* Create a new LedControl variable.
+ * We use pins 12,11 and 10 on the Arduino for the SPI interface
+ * Pin 12 is connected to the DATA IN-pin of the first MAX7221
+ * Pin 11 is connected to the CLK-pin of the first MAX7221
+ * Pin 10 is connected to the LOAD(/CS)-pin of the first MAX7221
+ * Amount of MAX7221 modules attached to the arduino
+ */
+  LedControl(4, 2, 3, 3),
+  LedControl(7, 5, 6, 3),
+  LedControl(10, 8, 9, 3),
+  LedControl(13, 11, 12, 3)
+};
+int totalLedSize = 12;
+
+unsigned long updateDelayMs = 0;
+unsigned long autoResetMs = 0;
+
+
+const char *defaultText = (const char *)"\201 Welkom in de kelder! \201 \217\220\0";
 
 bool isReset = false;
 enum mode_t mode = SCROLLING_TEXT;
@@ -29,21 +51,22 @@ void setup() {
   reset();
 }
 
-unsigned long lastUpdate = getCurrentTime();
-unsigned long lastContentChange = getCurrentTime();
+// Note: overflows once every month
+unsigned long lastUpdate = millis();
+unsigned long lastContentChange = millis();
 
 void loop() {
   receiveSerial();
 
-  if (!isReset && autoResetMs > 0 && (getCurrentTime() - lastContentChange) > autoResetMs)
+  if (!isReset && autoResetMs > 0 && (millis() - lastContentChange) > autoResetMs)
     reset();
 
   switch (mode) {
     case SCROLLING_TEXT:
-      if (updateDelayMs == 0 || (getCurrentTime() - lastUpdate) > updateDelayMs) {
+      if (updateDelayMs == 0 || (millis() - lastUpdate) > updateDelayMs) {
         scrollText();
         renderText();
-        lastUpdate = getCurrentTime();
+        lastUpdate = millis();
       }
       break;
     case STATIC:
@@ -63,7 +86,7 @@ void reset() {
 }
 
 void contentChanged() {
-  lastContentChange = getCurrentTime();
+  lastContentChange = millis();
   isReset = false;
 }
 
@@ -72,7 +95,7 @@ int receiveIndex = 0;
 char receiveBuffer[maxNumChars];   // an array to store the received data
 
 // source: https://forum.arduino.cc/t/serial-input-basics-updated/382007
-char** receiveSerial() {
+void receiveSerial() {
   char r_char;
 
   while (Serial.available() > 0) {
@@ -128,3 +151,14 @@ void processCommand() {
       break;
   }
 }
+
+//template<typename T, T val> constexpr void static_print(){int _;};
+//static void static_printer()
+//{
+//    //static_print<int, sizeof(size_t)>();
+//    //static_print<int, sizeof(int)>();
+//    //static_print<int, sizeof(long int)>();
+//    //static_print<int, sizeof(long long int)>();
+//    //static_print<int, sizeof(float)>();
+//    //static_print<int, sizeof(float)>();
+//}

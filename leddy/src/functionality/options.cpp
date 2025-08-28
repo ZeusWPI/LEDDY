@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "functionality/options.hpp"
 
-#include "utility.h"
-#include "limits.h"
+#include <limits.h>
 
-long charsToInt(char *str) {
+#include "functionality/text/text.hpp"
+#include "leddy.hpp"
+
+static long charsToInt(char *str) {
   long result = 0;
   long sign = 1;
   while (('-' == (*str)) || ((*str) == '+')) {

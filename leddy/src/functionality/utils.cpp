@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "functionality/utils.hpp"
 
-#include "utility.h"
+#include "led_control/utils.hpp"
+#include "leddy.hpp"
 
 void processUtilCommand(char *command) {
   fillDisplay(strcmp(command, "ClearDisplay") != 0);
