@@ -2,19 +2,35 @@
 
 #### Control LEDDY
 
-There is a **web interface on http://10.1.0.181** to control everything.
+There is a **web interface on http://leddy** to control everything.
 
-There is also an API: send an HTTP POST request to http://10.1.0.181 with the following plaintext body:
+There is also an API: send an HTTP POST request to http://leddy with the following plaintext body:
 ```
 COMMAND [command opts ...]
-
-Commands:
-    ScrollingText <text>
-    ClearDisplay
 ```
+
 Example:
 ```bash
-$ echo "ScrollingText Welkom in de kelder!" | http POST 10.1.0.181
+$ curl leddy -X POST --data 'ScrollingText Welkom in de kelder!'
+```
+
+Available commands are as follows:
+```
+Commands:
+    Text <text>
+    ScrollingText <text>
+
+    ClearDisplay
+    FillDisplay
+
+    Audio
+
+    Option text_spaceWidth <width>
+    Option text_trailingWhitespace <spaces>
+    Option updateDelayMs <milliseconds>
+    Option autoResetMs <milliseconds>
+    Option text_scrollDirection 1
+    Option text_scrollDirection -1
 ```
 
 #### Hardware
