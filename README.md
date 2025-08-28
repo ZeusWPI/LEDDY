@@ -1,6 +1,6 @@
 ## LED DisplaY
 
-#### Control LEDDY
+### Control LEDDY
 
 There is a **web interface on http://leddy** to control everything.
 
@@ -33,7 +33,7 @@ Commands:
     Option text_scrollDirection -1
 ```
 
-#### Hardware
+### Hardware
 
 - ESP8266 aka Servy: handles outside communication
 - Arduino Uno: controlling the LEDS
@@ -42,8 +42,11 @@ Commands:
 <img src="https://user-images.githubusercontent.com/47608311/211937380-e48b0876-e36b-4873-9c20-ebee0466bb67.png" height="500px" />
 
 
+### Leddy
+
 #### Notes on LED control implementation
 
+- We include a modifier version of [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6 in this repository.
 - The LedControl library can only handle 8 displays chained. We have 12 displays. 4 chains of each 3 displays. Displays are chained on the same bus, more displays on the same bus causes slow text scrolling. This is the reason they are split into 4 different busses with each only 3 displays.
 - To set or unset leds on the display:
     - `setLed(..., bool state)` sets one led on or off
@@ -52,6 +55,20 @@ Commands:
 - Each character is stored as 8 bytes resulting in an 8 by 8 grid of bits
 - We do some weird 'transposing' of the text string, so that the list of bytes to display are columns when looking at the led displays. To display what we call a sliding window, we just have to send the correct columns to the displays.
 - The font is originally from Marcel Sondaar, public domain, made available [here](https://github.com/dhepper/font8x8)
+
+#### Development
+
+Requires the `platformio` cli tool, follow [these instructions](https://docs.platformio.org/en/latest/core/installation/methods/installer-script.html) to install it.
+
+Afterwards, build and flash using the following:
+```
+. ~/.platformio/penv/bin/activate # Might depend on platform
+pio run -t clean
+pio run
+pio run -t upload -t monitor
+```
+
+You can run `platformio project init --ide [editor]` to generate editor-specific files.
 
 #### Servy
 
@@ -66,10 +83,3 @@ Commands:
         ```
     2. Use the WebREPL in `servy/webrepl/webrepl.html` (submodule) to update or execute code on Servy.
         Connect with `ws://10.1.0.181:8266`. password = `led=demax`
-
-#### Development
-
-- Arduino IDE
-- Dependencies:
-    - Modified version of [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6. The files are included in this repository.
-
