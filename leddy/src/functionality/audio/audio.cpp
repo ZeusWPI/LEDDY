@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "functionality/audio/audio.hpp"
 
 #include <arduinoFFT.h>
 
-arduinoFFT FFT = arduinoFFT();
+#include "led_control/utils.hpp"
+
+ArduinoFFT<double> FFT = ArduinoFFT<double>();
 
 double realComponent[64];
 double imagComponent[64];
@@ -21,9 +24,9 @@ void renderAudio() {
     imagComponent[i] = 0;
   }
 
-  FFT.Windowing(realComponent, 64, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-  FFT.Compute(realComponent, imagComponent, 64, FFT_FORWARD);
-  FFT.ComplexToMagnitude(realComponent, imagComponent, 64);
+  FFT.windowing(realComponent, 64, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.compute(realComponent, imagComponent, 64, FFT_FORWARD);
+  FFT.complexToMagnitude(realComponent, imagComponent, 64);
 
   for (int i = 0; i < 32; i++) {
     realComponent[i] = constrain(realComponent[i], 0, 35);

@@ -1,22 +1,33 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
+#include "functionality/text/text.hpp"
 
-#include "text.h"
+#include "led_control/led_control.hpp"
+#include "led_control/utils.hpp"
+#include "leddy.hpp"
 
-#include "../../ledcontrol/LedControl.h"
-#include "../../ledcontrol/util.c"
+// GLOBAL TEXT VARS
+char text[50] = {0};
+size_t textBufferSize = 460;
+byte textBuffer[460]; // if text is 64 chars, then big enough
+
+int trailingWhitespace = 6 * 8; // Four modules between loops
+int spaceWidth = 6;
+int currentTextIndex = 0;
+int scrollDirection = 1;
+// GLOBAL TEXT VARS
 
 /**
  * Helper function to get a bit from a byte.
  */
-inline bool getBit(byte input, int bit) {
+static inline bool getBit(byte input, int bit) {
   return (input & (0x80 >> bit)) > 0;
 }
 
 /**
  * Helper function to change a bit in a byte.
  */
-inline byte setBit(byte input, int bit, bool value) {
+static inline byte setBit(byte input, int bit, bool value) {
     byte mask = value << (7 - bit);  // example 00010000
     return (input & (~mask)) | mask;
 }
@@ -25,12 +36,12 @@ inline byte setBit(byte input, int bit, bool value) {
  * Characters are stored as a byte per row, we want to store them as a byte per
  * column.
  */
-void convertCharacterRowsToColumns(unsigned char character, byte *columnBased) {
+static void convertCharacterRowsToColumns(char character, byte *columnBased) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             columnBased[i] =
                 setBit(columnBased[i], j,
-                       getBit(pgm_read_byte(&(font8x8_basic[character][7 - j])),
+                       getBit(pgm_read_byte(&(font8x8_basic[(unsigned char)character][7 - j])),
                               7 - i));
         }
     }
@@ -40,7 +51,7 @@ void convertCharacterRowsToColumns(unsigned char character, byte *columnBased) {
  *  Squash spaces in buffer. The buffer is filled up to length
  *  Returns the new length (<= original length)
  */
-int squashSpaces(byte *buffer, int length) {
+static int squashSpaces(byte *buffer, int length) {
     int newLength = length;
     int i = 0;
     while (i < newLength) {
@@ -73,14 +84,14 @@ int squashSpaces(byte *buffer, int length) {
 /**
  *  Preprocess the text into the textBuffer buffer
  */
-void processString(unsigned char *text, bool padBuffer = false) {
+static void processString(char *text, bool padBuffer = false) {
     // clear buffer, just to be sure
-    for (int i = 0; i < textBufferSize; i++) {
+    for (size_t i = 0; i < textBufferSize; i++) {
         textBuffer[i] = 0;
     }
 
     // setup textBuffer
-    for (int i = 0; i < strlen(text); i++) {
+    for (size_t i = 0; i < strlen(text); i++) {
         byte columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
         convertCharacterRowsToColumns(text[i], columnBasedCharacter);
         for (int j = 0; j < 8; j++) {
@@ -94,12 +105,12 @@ void processString(unsigned char *text, bool padBuffer = false) {
     if (padBuffer) {
         textBufferSize = 12 * 8;
     }
-    for (int i = squashedSize; i < textBufferSize; i++) {
+    for (size_t i = squashedSize; i < textBufferSize; i++) {
         textBuffer[i] = 0;
     }
 }
 
-void initText(unsigned char *newText, bool padBuffer = false) {
+void initText(const char *newText, bool padBuffer) {
     if (newText) {
         strcpy(text, newText);
         text[strlen(newText)] = '\0';
