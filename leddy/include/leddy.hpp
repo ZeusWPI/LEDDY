@@ -3,26 +3,17 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdint.h>
 
-#include "led_control/led_control.hpp"
+#include "led_matrix_chain.hpp"
 
-extern int amountOfScreens;
+constexpr size_t ct_ledMatrixChainCount = 1;
+constexpr size_t ct_ledMatricesPerChain = 12;
+constexpr size_t ct_ledMatrixTotalCount = ct_ledMatrixChainCount * ct_ledMatricesPerChain;
 
-extern LedControl lcs[4];
-extern int totalLedSize;
-
-enum mode_t {
-  SCROLLING_TEXT,
-  STATIC,
-  AUDIO
-};
-
-extern unsigned long updateDelayMs;
-extern unsigned long autoResetMs;
+extern LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount];
+extern uint32_t g_updateDelayMs;
+extern uint32_t g_autoResetMs;
 
 void setup();
 void loop();
-void reset();
-void contentChanged();
-void receiveSerial();
-void processCommand();

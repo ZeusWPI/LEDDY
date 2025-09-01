@@ -3,5 +3,6 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdint.h>
 
-extern const unsigned char font8x8_basic[145][8];
+extern const uint8_t font8x8_basic[145][8];

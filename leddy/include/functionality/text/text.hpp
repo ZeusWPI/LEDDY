@@ -3,32 +3,29 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdint.h>
 
 #include "functionality/text/font.hpp"
 
-// GLOBAL TEXT VARS
-extern char text[50];
-extern size_t textBufferSize;
-extern byte textBuffer[460];
-
-extern int trailingWhitespace;
-extern int spaceWidth;
-extern int currentTextIndex;
-extern int scrollDirection;
-// GLOBAL TEXT VARS
+// Global options
+extern int16_t trailingWhitespace;
+extern int16_t spaceWidth;
+extern int16_t scrollDirection;
 
 /**
-  * Initialize the `text` buffer
-  *   padBuffer: pad the text buffer with spaces to fille the whole screen
-  */
+ * Render `text` to the internal pixel buffer.
+ * Params:
+ *     text = The asciiz string to render. Length must be < 64 bytes.
+ *     padBuffer = Pad the text buffer with spaces to fill the whole screen.
+ */
 void initText(const char* text, bool padBuffer = false);
 
 /**
-  * Move the Text one over
-  */
+ * Shifts the internal pixel buffer by `scrolldirection`.
+ */
 void scrollText();
 
 /**
-  * Draw the `text` buffer
-  */
+ * Send the internal pixel buffer to the led matrices.
+ */
 void renderText();
