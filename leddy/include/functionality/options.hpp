@@ -3,6 +3,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdint.h>
 
 // Glory to global vars!
 void processOption(char *command);
