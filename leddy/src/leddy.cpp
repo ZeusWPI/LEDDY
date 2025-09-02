@@ -7,7 +7,7 @@
 #include "functionality/options.hpp"
 #include "functionality/text/text.hpp"
 
-/*
+/**
  * Pin 2 is connected to `CLK`.
  * Pin 3 is connected to `LOAD (~CS)`.
  * Pin 4 is connected to the first `DATA IN`.
