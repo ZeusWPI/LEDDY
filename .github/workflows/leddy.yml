@@ -18,4 +18,5 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install --upgrade platformio
-      - run: pio run
+      - working-directory: ./leddy
+        run: pio run
