@@ -8,17 +8,23 @@
 #include "functionality/text/font.hpp"
 
 // Global options
-extern int16_t trailingWhitespace;
-extern int16_t spaceWidth;
-extern int16_t scrollDirection;
+extern int16_t g_trailingWhitespace;
+extern int16_t g_spaceWidth;
+extern int16_t g_scrollDirection;
 
 /**
- * Render `text` to the internal pixel buffer.
  * Params:
- *     text = The asciiz string to render. Length must be < 64 bytes.
+ *     newText = An asciiz string. A copy is made. Truncated if too long.
+ * Note: Has no effect until `prepareText` is called.
+ */
+void setText(const char *newText);
+
+/**
+ * Render the text set by `setText` to the internal pixel buffer.
+ * Params:
  *     padBuffer = Pad the text buffer with spaces to fill the whole screen.
  */
-void initText(const char* text, bool padBuffer = false);
+void prepareText(bool padBuffer = false);
 
 /**
  * Shifts the internal pixel buffer by `scrolldirection`.

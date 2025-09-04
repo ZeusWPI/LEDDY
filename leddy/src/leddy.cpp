@@ -2,10 +2,9 @@
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
 #include "leddy.hpp"
 
-#include "Arduino.h"
 #include "functionality/audio/audio.hpp"
-#include "functionality/options.hpp"
 #include "functionality/text/text.hpp"
+#include "serial.hpp"
 
 /**
  * Pin 2 is connected to `CLK`.
@@ -15,7 +14,7 @@
 LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount] = {
     LedMatrixChain<ct_ledMatricesPerChain>(2, 3, 4),
 };
-uint32_t g_updateDelayMs = 10;
+uint32_t g_targetFrameTimeMs = 10;
 uint32_t g_autoResetMs = 15000;
 
 static constexpr const char *defaultText = (char*) "\201 Welkom in de kelder! \201 \217\220\0";
@@ -27,14 +26,12 @@ enum struct Mode
     FILL,
     TEXT,
     SCROLLING_TEXT,
-    AUDIO
+    AUDIO,
 };
 
 static bool inDefaultMode = false;
 static enum Mode mode = Mode::NONE;
 static const int maxNumChars = 50;
-static int receiveIndex = 0;
-static char receiveBuffer[maxNumChars]; // An array to store the received data
 static uint32_t initInterval = 2000;
 
 static uint32_t lastInitTimestamp = 0;
@@ -43,8 +40,6 @@ static uint32_t lastRedrawTimestamp = 0;
 
 static void contentChanged()
 {
-    Serial.println("contentChanged");
-
     lastContentChangeTimestamp = millis();
     lastRedrawTimestamp = 0;
     inDefaultMode = false;
@@ -52,42 +47,11 @@ static void contentChanged()
 
 static void defaultMode()
 {
-    Serial.println("defaultMode");
-    initText(defaultText);
+    setText(defaultText);
+    prepareText();
     mode = Mode::SCROLLING_TEXT;
     contentChanged();
     inDefaultMode = true;
-}
-
-static Mode processCommand()
-{
-    Serial.print("processCommand: ");
-    Serial.println(receiveBuffer);
-
-    switch (receiveBuffer[0])
-    {
-    case 'U':
-        if (receiveBuffer[1] == 'C')
-            return Mode::CLEAR;
-        if (receiveBuffer[1] == 'F')
-            return Mode::FILL;
-        break;
-    case 'T':
-        initText(receiveBuffer + 1, true);
-        return Mode::TEXT;
-    case 'S':
-        initText(receiveBuffer + 1);
-        return Mode::SCROLLING_TEXT;
-    case 'A':
-        return Mode::AUDIO;
-    case 'O':
-        processOption(receiveBuffer + 1);
-        return Mode::NONE;
-    default:
-        break;
-    }
-    Serial.println("processCommand error: Unknown command");
-    return Mode::NONE;
 }
 
 static void initAllMatrices()
@@ -104,38 +68,76 @@ void setup()
     defaultMode();
 }
 
-// source: https://forum.arduino.cc/t/serial-input-basics-updated/382007
-static void receiveSerial()
+void processCommand(const Command cmd)
 {
-    char r_char = 0;
-    while (Serial.available() > 0)
+    switch (cmd.type)
     {
-        r_char = Serial.read();
-        if (r_char == '\n')
+    case CommandType::CHANGE_MODE_CLEAR:
+        mode = Mode::CLEAR;
+        contentChanged();
+        break;
+    case CommandType::CHANGE_MODE_FILL:
+        mode = Mode::FILL;
+        contentChanged();
+        break;
+    case CommandType::CHANGE_MODE_TEXT:
+        mode = Mode::TEXT;
+        prepareText(true);
+        contentChanged();
+        break;
+    case CommandType::CHANGE_MODE_SCROLLING_TEXT:
+        mode = Mode::SCROLLING_TEXT;
+        prepareText();
+        contentChanged();
+        break;
+    case CommandType::CHANGE_MODE_AUDIO:
+        mode = Mode::AUDIO;
+        contentChanged();
+        break;
+
+    case CommandType::SET_OPT_targetFrameTimeMs:
+        if (0 <= cmd.setOptValue)
+            g_targetFrameTimeMs = cmd.setOptValue;
+        break;
+    case CommandType::SET_OPT_autoResetMs:
+        if (0 <= cmd.setOptValue)
+            g_autoResetMs = cmd.setOptValue;
+        break;
+    case CommandType::SET_OPT_text_trailingWhitespace:
+        if (0 <= cmd.setOptValue)
         {
-            receiveBuffer[receiveIndex] = '\0'; // Terminate the string
-            if (receiveIndex > 0)
-            {
-                receiveIndex = 0;
-                const Mode newMode = processCommand();
-                if (newMode != Mode::NONE)
-                {
-                    contentChanged();
-                    mode = newMode;
-                }
-            }
-            return;
+            g_trailingWhitespace = cmd.setOptValue;
+            prepareText(mode == Mode::TEXT);
         }
-        receiveBuffer[receiveIndex] = r_char;
-        receiveIndex++;
-        if (receiveIndex >= maxNumChars)
-            receiveIndex = maxNumChars - 1;
+        break;
+    case CommandType::SET_OPT_text_spaceWidth:
+        if (0 <= cmd.setOptValue && cmd.setOptValue <= 8)
+        {
+            g_spaceWidth = cmd.setOptValue;
+            prepareText(mode == Mode::TEXT);
+        }
+        break;
+    case CommandType::SET_OPT_text_scrollDirection:
+        if (cmd.setOptValue == -1 || cmd.setOptValue == 1)
+        {
+            g_scrollDirection = cmd.setOptValue;
+            prepareText(mode == Mode::TEXT);
+        }
+        break;
+
+    case CommandType::SET_TEXT:
+        contentChanged();
+        setText(cmd.setTextValue);
+        prepareText(mode == Mode::TEXT);
+        break;
+    default:
+        break;
     }
 }
 
 void loop()
 {
-    receiveSerial();
+    processCommand(receiveCommand());
 
     if (initInterval > 0 && (millis() - lastInitTimestamp) > initInterval)
         initAllMatrices();
@@ -143,7 +145,7 @@ void loop()
     if (!inDefaultMode && g_autoResetMs > 0 && (millis() - lastContentChangeTimestamp) > g_autoResetMs)
         defaultMode();
 
-    if (g_updateDelayMs > 0 && (millis() - lastRedrawTimestamp) < g_updateDelayMs)
+    if (g_targetFrameTimeMs > 0 && (millis() - lastRedrawTimestamp) < g_targetFrameTimeMs)
         return;
 
     switch (mode)
@@ -171,17 +173,3 @@ void loop()
     }
     lastRedrawTimestamp = millis();
 }
-
-//template<typename T, T val> void static_print(){int _;};
-//static void static_printer()
-//{
-//    //static_print<int, sizeof(size_t)>();
-//    //static_print<int, sizeof(int)>();
-//    //static_print<int, sizeof(long int)>();
-//    //static_print<int, sizeof(long long int)>();
-//    //static_print<int, sizeof(float)>();
-//    //static_print<int, sizeof(double)>();
-//    //static_print<int, A0>();
-//    //static_print<int, A1>();
-//    //static_print<int, sizeof(g_lmcs)>();
-//}

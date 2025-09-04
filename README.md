@@ -25,9 +25,9 @@ Commands:
 
     Audio
 
-    Option text_spaceWidth <width>
-    Option text_trailingWhitespace <spaces>
-    Option updateDelayMs <milliseconds>
+    Option text_spaceWidth <columns>
+    Option text_trailingWhitespace <columns>
+    Option targetFrameTimeMs <milliseconds>
     Option autoResetMs <milliseconds>
     Option text_scrollDirection 1
     Option text_scrollDirection -1

@@ -12,7 +12,7 @@ constexpr size_t ct_ledMatricesPerChain = 12;
 constexpr size_t ct_ledMatrixTotalCount = ct_ledMatrixChainCount * ct_ledMatricesPerChain;
 
 extern LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount];
-extern uint32_t g_updateDelayMs;
+extern uint32_t g_targetFrameTimeMs;
 extern uint32_t g_autoResetMs;
 
 void setup();
