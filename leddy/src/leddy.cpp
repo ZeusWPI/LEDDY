@@ -15,7 +15,7 @@
 LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount] = {
     LedMatrixChain<ct_ledMatricesPerChain>(2, 3, 4),
 };
-uint32_t g_updateDelayMs = 0;
+uint32_t g_updateDelayMs = 10;
 uint32_t g_autoResetMs = 15000;
 
 static constexpr const char *defaultText = (char*) "\201 Welkom in de kelder! \201 \217\220\0";
