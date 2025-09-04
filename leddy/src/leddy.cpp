@@ -92,7 +92,6 @@ static Mode processCommand()
 
 static void initAllMatrices()
 {
-    Serial.println("initAllMatrices");
     lastInitTimestamp = millis();
     for (size_t i = 0; i < ct_ledMatrixChainCount; i++)
         g_lmcs[i].init();
