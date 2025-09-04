@@ -24,19 +24,18 @@ static inline uint8_t setBit(uint8_t input, uint8_t bit, bool value)
     return (input & (~mask)) | mask;
 }
 
+static constexpr size_t ct_sampleCount = ct_ledMatrixTotalCount * 8;
+
 static ArduinoFFT<float> FFT = ArduinoFFT<float>();
-static float realComponent[64];
-static float imagComponent[64];
-static uint8_t heights[48];
-
-static uint8_t pixels[12 * 8];
-
-static_assert(sizeof(heights) * 2 == sizeof(pixels), "");
+static float realComponent[ct_sampleCount];
+static float imagComponent[ct_sampleCount];
+static uint8_t heights[ct_sampleCount];
+static uint8_t pixels[ct_sampleCount]; // Row by row
 
 void renderAudio()
 {
     // Read samples from A3.
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < ct_sampleCount; i++)
     {
         realComponent[i] = analogRead(A3);
         imagComponent[i] = 0;
@@ -45,30 +44,44 @@ void renderAudio()
     FFT.compute(realComponent, imagComponent, 64, FFT_FORWARD);
     FFT.complexToMagnitude(realComponent, imagComponent, 64);
     // Determine frequency spectrum heights.
-    for (int i = 0; i < 48; i++)
+    for (int i = 0; i < ct_sampleCount; i++)
     {
         const uint8_t constrained = constrain(realComponent[i], 0, 35);
-        heights[i] = map(constrained, 0, 35, 0, 8);
+        heights[i] = map(constrained, 0, 35, 0, 8); // 9 states
     }
 
     // Render the heights as vertical bars.
-    for (size_t matrix = 0; matrix < ct_ledMatrixTotalCount; matrix++)
+    memset(&pixels[0], 0, sizeof(pixels));
+    for (size_t row = 0; row < 8; row++)
     {
-        const size_t base = matrix * 8;
-        for (size_t row = 0; row < 8; row++)
+        for (size_t matrix = 0; matrix < ct_ledMatrixTotalCount; matrix++)
         {
-            uint8_t rowPixels = 0;
             for (size_t col = 0; col < 8; col++)
-                rowPixels |= heights[(base + col) / 2] >= row;
-            pixels[base + row] = rowPixels;
+            {
+                if (col > heights[row * ct_ledMatrixTotalCount + matrix])
+                {
+                    pixels[row * ct_ledMatrixTotalCount + matrix] |= (1 << col);
+                }
+            }
         }
     }
+    //for (size_t matrix = 0; matrix < ct_ledMatrixTotalCount; matrix++)
+    //{
+    //    const size_t base = matrix * 8;
+    //    for (size_t row = 0; row < 8; row++)
+    //        pixels[base + row] = 0;
+    //    for (size_t col = 0; col < 8; col++)
+    //    {
+    //        const uint8_t colPixels = heights[base + col] >= 1 ? 0xFF : 0;
+    //        for (size_t row = 0; row < 8; row++)
+    //        {
+    //            const bool bit = colPixels & (1 << row);
+    //            pixels[base + row] |= bit << col;
+    //        }
+    //    }
+    //}
 
     // Finally, send the render to the led matrices.
-    for (size_t chain = 0; chain <= ct_ledMatrixChainCount; chain++)
-    {
-        const size_t base = chain * ct_ledMatricesPerChain * 8;
-        for (size_t row = 0; row <= 8; row++)
-            g_lmcs[chain].setRowsFromPixArr(row, pixels, sizeof(pixels), base + row);
-    }
+    for (size_t row = 0; row <= 8; row++)
+        g_lmcs[0].setRows(row, &pixels[row * ct_ledMatrixTotalCount]);
 }
