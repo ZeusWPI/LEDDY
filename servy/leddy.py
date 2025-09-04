@@ -15,22 +15,24 @@ def try_write(msg):
 
 def text(text):
     try_write(f'T{str(text)}\n')
+    try_write(f'MT')
     return f'Displaying text "{text}"'
 
 def scrolling_text(text):
-    try_write(f'S{str(text)}\n')
+    try_write(f'T{str(text)}\n')
+    try_write(f'MS')
     return f'Displaying scrolling text "{text}"'
 
 def clear_display():
-    try_write('UClearDisplay\n')
+    try_write('MC\n')
     return 'Cleared display'
 
 def fill_display():
-    try_write('UFillDisplay\n')
+    try_write('MF\n')
     return 'Filled display'
 
 def audio():
-    try_write('A\n')
+    try_write('MA\n')
     return 'Enabled audio'
 
 def option(option):

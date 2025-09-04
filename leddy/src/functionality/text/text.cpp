@@ -5,9 +5,9 @@
 #include "leddy.hpp"
 
 // Global options
-int16_t trailingWhitespace = 6 * 8; // Four modules between loops
-int16_t spaceWidth = 6;
-int16_t scrollDirection = 1;
+int16_t g_spaceWidth = 6;
+int16_t g_trailingWhitespace = 12 * 8;
+int16_t g_scrollDirection = 1;
 
 /**
  * Helper function to get a bit from a byte.
@@ -27,44 +27,6 @@ static inline uint8_t setBit(uint8_t input, uint8_t bit, bool value)
 }
 
 /**
- * Squash spaces in the `pixels` buffer. The buffer is filled up to `length`.
- * Returns the new length (<= original length).
- */
-static int squashSpaces(uint8_t *pixels, int length)
-{
-    int newLength = length;
-    int i = 0;
-    while (i < newLength)
-    {
-        if (!pixels[i]) // A zero row
-        {
-            int spaces = 0;
-            // while not at the end and there is a space
-            while (i + spaces < newLength && !pixels[i + spaces])
-                spaces++;
-            if (i + spaces == newLength)
-            {
-                // At the end of the buffer, trim spaces and return new length
-                return newLength - spaces;
-            }
-            // In the input, a space character will be 8 space columns.
-            // Either squash to spaceWidth spaces or 1 space
-            const int toShift = spaces >= 8 ? spaces - spaceWidth : spaces - 1;
-            if (toShift > 0)
-            {
-                for (int j = i + spaces; j < newLength; j++)
-                    pixels[j - toShift] = pixels[j];
-                newLength = newLength - toShift;
-            }
-            i = i + spaces - toShift;
-        }
-        i++;
-    }
-    return newLength;
-}
-
-
-/**
  * Characters are stored as a byte per row, we want to store them as a byte per
  * column.
  */
@@ -79,41 +41,55 @@ static void renderCharacterColumn(char c, uint8_t col[8])
         }
 }
 
-static uint8_t textPixels[460] = {}; // If text is 64 chars, then big enough
+static char text[64] = {};
+static size_t textLength = 0;
+static uint8_t textPixels[sizeof(text) * 9] = {};
 static size_t textPixelsLength = 0;
 static int16_t textScrollIndex = 0;
 
-void initText(const char *newText, bool padBuffer)
+void setText(const char *newText)
+{
+    strncpy(text, newText, sizeof(text));
+    textLength = strlen(text);
+}
+
+void prepareText(bool padBuffer)
 {
     textScrollIndex = 0;
-
-    // clear buffer, just to be sure
     memset(textPixels, 0, textPixelsLength);
+    textPixelsLength = textLength * 8;
 
-    const size_t newTextLength = strlen(newText);
-    textPixelsLength = newTextLength * 8;
-
-    // setup textPixels
-    for (size_t i = 0; i < newTextLength; i++)
+    // Render the text to `textPixels`.
+    size_t col = 0;
+    for (size_t textIndex = 0; textIndex < textLength; ++textIndex)
     {
-        uint8_t columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-        renderCharacterColumn(newText[i], columnBasedCharacter);
-        for (int j = 0; j < 8; j++)
-            textPixels[i * 8 + j] = columnBasedCharacter[j];
+        const char c = text[textIndex];
+        if (c == ' ')
+        {
+            // Spaces have configurable width.
+            // Pixels are zero-initialized so we can just skip spaces.
+            col += g_spaceWidth;
+        }
+        else
+        {
+            uint8_t columnBasedCharacter[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+            renderCharacterColumn(text[textIndex], columnBasedCharacter);
+            for (size_t j = 0; j < 8; ++j)
+                if (columnBasedCharacter[j] != 0) // Skip whitespace
+                    textPixels[col++] = columnBasedCharacter[j];
+            col++; // Add a single spacing column
+        }
     }
 
-    // Squash space between letters
-    const size_t squashedSize = squashSpaces(textPixels, textPixelsLength);
-    textPixelsLength = textPixelsLength + trailingWhitespace;
+    textPixelsLength += g_trailingWhitespace;
     if (padBuffer)
-        textPixelsLength = 12 * 8;
-    for (size_t i = squashedSize; i < textPixelsLength; i++)
-        textPixels[i] = 0;
+        textPixelsLength += 12 * 8; // The full width in whitespace.
+    textPixelsLength = constrain(textPixelsLength, 0, sizeof(textPixels));
 }
 
 void scrollText()
 {
-    textScrollIndex = (textScrollIndex + scrollDirection + textPixelsLength) % textPixelsLength;
+    textScrollIndex = (textPixelsLength + textScrollIndex + g_scrollDirection) % textPixelsLength;
 }
 
 void renderText()
