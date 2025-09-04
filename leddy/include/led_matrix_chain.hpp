@@ -126,7 +126,6 @@ private:
 
         //noInterrupts();
 
-        writePin(load, 0);
         for (size_t i = 0; i < sizeof(m_spiData); i++)
         {
             uint8_t b = m_spiData[i];
@@ -139,6 +138,7 @@ private:
                 writePin(clk, 0);
             }
         }
+        writePin(load, 0);
         writePin(load, 1);
 
         //interrupts();
