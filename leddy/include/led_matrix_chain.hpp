@@ -77,6 +77,7 @@ private:
     uint8_t m_clkPin = 0;  // Active high.
     uint8_t m_loadPin = 0; // Active high.
     uint8_t m_mosiPin = 0; // Active high.
+    uint8_t m_intensity = 15;
     uint8_t m_spiData[ct_deviceCount * 2] = {};
 
 public:
@@ -158,9 +159,9 @@ public:
         pinMode(m_loadPin, OUTPUT);
 
         foreach_dev_send(LedMatrixReg::NO_OP, 0);
-        setAllRows(0);
+        //setAllRows(0);
         foreach_dev_send(LedMatrixReg::DECODE_MODE, 0);
-        foreach_dev_send(LedMatrixReg::INTENSITY, 1);
+        foreach_dev_send(LedMatrixReg::INTENSITY, m_intensity);
         foreach_dev_send(LedMatrixReg::SCAN_LIMIT, 7);
         foreach_dev_send(LedMatrixReg::SHUTDOWN, 1);
         foreach_dev_send(LedMatrixReg::UNKNOWN_0x0D, 0);
@@ -172,6 +173,7 @@ public:
      * Set the intensity (brightness) of all displays.
      * Params:
      *     intensity = Value in the range `[0, 15]`.
+     * Note: 14 and 15 are the same brightness.
      */
     void setIntensity(uint8_t intensity)
     {
