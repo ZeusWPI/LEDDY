@@ -7,11 +7,9 @@
 
 #include "led_matrix_chain.hpp"
 
-constexpr size_t ct_ledMatrixChainCount = 1;
-constexpr size_t ct_ledMatricesPerChain = 12;
-constexpr size_t ct_ledMatrixTotalCount = ct_ledMatrixChainCount * ct_ledMatricesPerChain;
+constexpr size_t ct_ledMatrixCount = 12;
 
-extern LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount];
+extern LedMatrixChain<ct_ledMatrixCount> g_lmc;
 extern uint32_t g_targetFrameTimeMs;
 extern uint32_t g_autoResetMs;
 
