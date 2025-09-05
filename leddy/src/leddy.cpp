@@ -15,7 +15,7 @@ LedMatrixChain<ct_ledMatrixCount> g_lmc = LedMatrixChain<ct_ledMatrixCount>(2, 3
 uint32_t g_targetFrameTimeMs = 10;
 uint32_t g_autoResetMs = 15000;
 
-static constexpr const char *defaultText = (char*) "\201 Welkom in de kelder! \201 \217\220\0";
+static constexpr const char *defaultText = (char*) "\x80 Welkom in de kelder! \x80 \x81\x82\0";
 
 enum struct Mode
 {
