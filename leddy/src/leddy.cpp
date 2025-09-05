@@ -11,9 +11,7 @@
  * Pin 3 is connected to `LOAD (~CS)`.
  * Pin 4 is connected to the first `DATA IN`.
  */
-LedMatrixChain<ct_ledMatricesPerChain> g_lmcs[ct_ledMatrixChainCount] = {
-    LedMatrixChain<ct_ledMatricesPerChain>(2, 3, 4),
-};
+LedMatrixChain<ct_ledMatrixCount> g_lmc = LedMatrixChain<ct_ledMatrixCount>(2, 3, 4);
 uint32_t g_targetFrameTimeMs = 10;
 uint32_t g_autoResetMs = 15000;
 
@@ -57,8 +55,7 @@ static void defaultMode()
 static void initAllMatrices()
 {
     lastInitTimestamp = millis();
-    for (size_t i = 0; i < ct_ledMatrixChainCount; i++)
-        g_lmcs[i].init();
+    g_lmc.init();
 }
 
 void setup()
@@ -151,12 +148,10 @@ void loop()
     switch (mode)
     {
     case Mode::CLEAR:
-        for (size_t chain = 0; chain < ct_ledMatrixChainCount; chain++)
-            g_lmcs[chain].setAllRows(0x00);
+        g_lmc.setAllRows(0x00);
         break;
     case Mode::FILL:
-        for (size_t chain = 0; chain < ct_ledMatrixChainCount; chain++)
-            g_lmcs[chain].setAllRows(0xFF);
+        g_lmc.setAllRows(0xFF);
         break;
     case Mode::TEXT:
         renderText();

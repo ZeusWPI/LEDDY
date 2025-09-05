@@ -94,11 +94,6 @@ void scrollText()
 
 void renderText()
 {
-    size_t i = textScrollIndex;
-    for (size_t chain = 0; chain < ct_ledMatrixChainCount; chain++)
-    {
-        for (size_t row = 0; row < 8; row++)
-            g_lmcs[chain].setRowsFromPixArr(row, textPixels, textPixelsLength, i + row);
-        i += ct_ledMatricesPerChain * 8;
-    }
+    for (size_t row = 0; row < 8; row++)
+        g_lmc.setRowsFromPixArr(row, textPixels, textPixelsLength, textScrollIndex + row);
 }
