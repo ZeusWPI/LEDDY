@@ -5,8 +5,6 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#include "functionality/text/font.hpp"
-
 // Global options
 extern int16_t g_trailingWhitespace;
 extern int16_t g_spaceWidth;

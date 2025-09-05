@@ -2,7 +2,10 @@
 // SPDX-FileCopyrightText: Copyright 2022-2025 Zeus WPI
 #include "functionality/text/text.hpp"
 
+#include "functionality/text/font.hpp"
 #include "leddy.hpp"
+
+#define font font8x8_ascii_zeus
 
 // Global options
 int16_t g_spaceWidth = 6;
@@ -30,13 +33,17 @@ static inline uint8_t setBit(uint8_t input, uint8_t bit, bool value)
  * Characters are stored as a byte per row, we want to store them as a byte per
  * column.
  */
-static void renderCharacterColumn(char c, uint8_t col[8])
+static void renderCharacterColumn(const uint8_t c, uint8_t col[8])
 {
+    if (c < font::ct_firstChar || font::ct_lastChar < c)
+        return;
+    const uint8_t *charPixels = font::arr[c - font::ct_firstChar];
+
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
         {
-            const uint8_t row = pgm_read_byte(&(font8x8_basic[(uint8_t)c][7 - j]));
-            const bool pixel = getBit(row, 7 - i);
+            const uint8_t rowPixels = pgm_read_byte(&charPixels[7 - j]);
+            const bool pixel = getBit(rowPixels, 7 - i);
             col[i] = setBit(col[i], j, pixel);
         }
 }
@@ -63,7 +70,7 @@ void prepareText(bool padBuffer)
     size_t col = 0;
     for (size_t textIndex = 0; textIndex < textLength; ++textIndex)
     {
-        const char c = text[textIndex];
+        const uint8_t c = text[textIndex];
         if (c == ' ')
         {
             // Spaces have configurable width.
@@ -77,7 +84,8 @@ void prepareText(bool padBuffer)
             for (size_t j = 0; j < 8; ++j)
                 if (columnBasedCharacter[j] != 0) // Skip whitespace
                     textPixels[col++] = columnBasedCharacter[j];
-            col++; // Add a single spacing column
+            if (c < 0x80)
+                col++; // Add a single spacing column to regular characters
         }
     }
 
