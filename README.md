@@ -25,10 +25,10 @@ Commands:
 
     Audio
 
-    Option text_spaceWidth <columns>
-    Option text_trailingWhitespace <columns>
     Option targetFrameTimeMs <milliseconds>
     Option autoResetMs <milliseconds>
+    Option text_spaceWidth <columns>
+    Option text_trailingWhitespace <columns>
     Option text_scrollDirection 1
     Option text_scrollDirection -1
 ```
@@ -46,15 +46,15 @@ Commands:
 
 #### Notes on LED control implementation
 
-- We include a modifier version of [LedControl](http://wayoda.github.io/LedControl/) by Eberhard Fahle <e.fahle@wayoda.org> v1.0.6 in this repository.
-- The LedControl library can only handle 8 displays chained. We have 12 displays. 4 chains of each 3 displays. Displays are chained on the same bus, more displays on the same bus causes slow text scrolling. This is the reason they are split into 4 different busses with each only 3 displays.
-- To set or unset leds on the display:
-    - `setLed(..., bool state)` sets one led on or off
-    - `setRow(..., byte value)` sets a row of 8 leds, each led _i_ on or off depending on the bit _i_ of the `value`-byte
-    - `setColumn`, analogous to the above
-- Each character is stored as 8 bytes resulting in an 8 by 8 grid of bits
-- We do some weird 'transposing' of the text string, so that the list of bytes to display are columns when looking at the led displays. To display what we call a sliding window, we just have to send the correct columns to the displays.
-- The font is originally from Marcel Sondaar, public domain, made available [here](https://github.com/dhepper/font8x8)
+- All displays are chained together into one big shift register, each display holding 16 bits.
+  The protocol is described [here](https://www.analog.com/media/en/technical-documentation/data-sheets/MAX7219-MAX7221.pdf), and is implemented by the `LedMatrixChain` class, of which `g_lmc` is an instance.
+- To set or unset leds on the display, typically you would use:
+    - `g_lmc.setRows(uint8_t row, uint8_t pixels[12])`: Sets all `96` pixels of a single row of the ledstrip.
+      The MSB of the first byte of the first row is the top-left pixel.
+- As for text, each character is stored as 8 bytes resulting in an 8 by 8 grid of bits
+- We do some weird 'transposing' of the text string, so that the list of bytes to display are columns when looking at the led displays.
+  To display what we call a sliding window, we just have to send the correct columns to the displays.
+- The font is originally from Marcel Sondaar, public domain, made available [here](https://github.com/dhepper/font8x8).
 
 #### Development
 
@@ -72,7 +72,7 @@ You can run `platformio project init --ide [editor]` to generate editor-specific
 
 #### Servy
 
-- IP: 10.1.0.181
+- Hostame: `leddy`(`.kelder.local`).
 - Running [MicroPython](https://docs.micropython.org/en/latest/esp8266/tutorial/intro.html#getting-the-firmware)
 - Write files to microcontroller. `boot.py` and `main.py` are executed on boot.
     1. Connected through serial with `ampy`:
@@ -82,4 +82,4 @@ You can run `platformio project init --ide [editor]` to generate editor-specific
         $ ampy -p /dev/ttyUSB0 -b 115200 run main.py
         ```
     2. Use the WebREPL in `servy/webrepl/webrepl.html` (submodule) to update or execute code on Servy.
-        Connect with `ws://10.1.0.181:8266`. password = `led=demax`
+        Connect with `ws://leddy:8266`, password = `zeus`.
