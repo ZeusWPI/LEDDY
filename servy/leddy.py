@@ -8,8 +8,8 @@ import uos
 uos.dupterm(None, 1)
 uart = machine.UART(0, baudrate=9600)
 
-retries = 50
-retry_interval_ms = 100
+retries = 1
+retry_interval_ms = 5000
 expected = b'RX_OK'
 
 def try_write(msg):
