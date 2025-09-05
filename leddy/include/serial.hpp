@@ -40,4 +40,5 @@ struct Command
     };
 };
 
+void initSerial();
 Command receiveCommand();
