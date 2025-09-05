@@ -63,7 +63,7 @@ static void initAllMatrices()
 
 void setup()
 {
-    Serial.begin(9600);
+    initSerial();
     initAllMatrices();
     defaultMode();
 }
